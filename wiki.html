@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Ball Archive - Wiki</title>
+
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b4f8a 0%, #1e88e5 45%, #00acc1 85%, #4caf50 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(224, 242, 254, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(30, 136, 229, 0.5);
+      --glass-glow: rgba(30, 136, 229, 0.3);
+      --text-title: #06233d;
+      --text-body: #0b2e4c;
+      --accent-button: linear-gradient(180deg, rgba(82, 178, 248, 0.8) 0%, rgba(30, 136, 229, 0.8) 50%, rgba(21, 101, 192, 0.85) 51%, rgba(25, 118, 210, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-vermelho {
+      --bg-gradient: linear-gradient(135deg, #7a0c0c 0%, #d32f2f 45%, #ff5722 85%, #ff9800 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 235, 238, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(211, 47, 47, 0.5);
+      --glass-glow: rgba(211, 47, 47, 0.3);
+      --text-title: #3b0505;
+      --text-body: #4a0909;
+      --accent-button: linear-gradient(180deg, rgba(255, 107, 107, 0.8) 0%, rgba(211, 47, 47, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-laranja {
+      --bg-gradient: linear-gradient(135deg, #7c3600 0%, #f57c00 45%, #ff9800 85%, #ffc107 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 243, 224, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(245, 124, 0, 0.5);
+      --glass-glow: rgba(245, 124, 0, 0.3);
+      --text-title: #3d1b00;
+      --text-body: #472100;
+      --accent-button: linear-gradient(180deg, rgba(255, 183, 77, 0.8) 0%, rgba(245, 124, 0, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-verde {
+      --bg-gradient: linear-gradient(135deg, #094e24 0%, #2e7d32 45%, #009688 85%, #8bc34a 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(232, 245, 233, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(46, 125, 50, 0.5);
+      --glass-glow: rgba(46, 125, 50, 0.3);
+      --text-title: #04240d;
+      --text-body: #0a3314;
+      --accent-button: linear-gradient(180deg, rgba(102, 187, 106, 0.8) 0%, rgba(46, 125, 50, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-roxo {
+      --bg-gradient: linear-gradient(135deg, #4a148c 0%, #7b1fa2 45%, #ab47bc 85%, #e91e63 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(243, 229, 245, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(123, 31, 162, 0.5);
+      --glass-glow: rgba(123, 31, 162, 0.3);
+      --text-title: #220042;
+      --text-body: #2d054d;
+      --accent-button: linear-gradient(180deg, rgba(171, 71, 188, 0.8) 0%, rgba(123, 31, 162, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-preto {
+      --bg-gradient: linear-gradient(135deg, #090d12 0%, #1a232a 50%, #2a373f 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(15, 23, 42, 0.35) 100%);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --glass-border-outer: rgba(0, 0, 0, 0.6);
+      --glass-glow: rgba(0, 0, 0, 0.5);
+      --text-title: #ffffff;
+      --text-body: #e2e8f0;
+      --accent-button: linear-gradient(180deg, rgba(71, 85, 105, 0.8) 0%, rgba(30, 41, 59, 0.85) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%), var(--bg-gradient);
+      background-size: cover; background-position: center; background-attachment: fixed;
+      color: var(--text-body); padding: 20px; display: flex; flex-direction: column; align-items: center;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    .aero-window {
+      position: relative; background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(190%); -webkit-backdrop-filter: blur(22px) saturate(190%);
+      border-radius: 18px; border: 1.5px solid var(--glass-border); outline: 1px solid var(--glass-border-outer);
+      box-shadow: 0 20px 45px var(--glass-glow), 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 2px 2px rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+    }
+
+    .aero-window::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none; border-radius: 16px 16px 0 0;
+    }
+
+    header {
+      width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 25px; margin-bottom: 25px;
+    }
+
+    .header-title { text-align: center; flex: 1; position: relative; z-index: 2; }
+    .header-title h1 { font-size: 26px; font-weight: 800; color: var(--text-title); text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9); }
+
+    .btn-action {
+      padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #ffffff;
+      background: var(--accent-button); border: 1px solid var(--accent-button-border);
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .user-profile {
+      position: relative; z-index: 2; display: flex; align-items: center; gap: 12px;
+      padding: 5px 14px 5px 18px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+      backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 50px; min-width: 170px; justify-content: flex-end;
+    }
+
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.9); }
+    .user-name { font-size: 13.5px; font-weight: 700; color: var(--text-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+
+    main { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 25px; }
+
+    .search-filter-card { width: 100%; padding: 22px; display: flex; flex-direction: column; gap: 15px; }
+    .search-box-wrapper { position: relative; z-index: 2; width: 100%; }
+    .search-input {
+      width: 100%; padding: 12px 18px; border: 1.5px solid rgba(255, 255, 255, 0.8); border-radius: 12px;
+      font-size: 14.5px; outline: none; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); color: var(--text-body);
+    }
+
+    .categories-bar { position: relative; z-index: 2; display: flex; gap: 8px; flex-wrap: wrap; }
+    .cat-btn {
+      padding: 8px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 700;
+      background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.7);
+      color: var(--text-title); cursor: pointer; transition: all 0.2s ease;
+    }
+    .cat-btn:hover, .cat-btn.active { background: var(--accent-button); color: #ffffff; border-color: var(--accent-button-border); }
+
+    .wiki-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; width: 100%; }
+    .wiki-card { padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    .wiki-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px var(--glass-glow); }
+    .wiki-card-img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.8); position: relative; z-index: 2; }
+    .wiki-card-title { position: relative; z-index: 2; font-size: 16px; font-weight: 800; color: var(--text-title); }
+    .wiki-card-badge { position: relative; z-index: 2; font-size: 10.5px; font-weight: 800; text-transform: uppercase; padding: 3px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.7); color: var(--text-title); align-self: flex-start; }
+    .wiki-card-snippet { position: relative; z-index: 2; font-size: 13px; line-height: 1.5; color: var(--text-body); display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ESTILOS DA GALERIA MULTI-IMAGEM NO MODAL */
+    .wiki-modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px); display: none;
+      align-items: center; justify-content: center; z-index: 2000; padding: 20px;
+    }
+    .wiki-modal-overlay.active { display: flex; }
+    .wiki-modal-container { width: 100%; max-width: 750px; max-height: 85vh; display: flex; flex-direction: column; }
+    .wiki-modal-header { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
+    .wiki-modal-header h2 { font-size: 18px; font-weight: 800; color: var(--text-title); }
+    .close-modal-btn { background: none; border: none; font-size: 20px; font-weight: bold; color: var(--text-title); cursor: pointer; }
+    .wiki-modal-body { position: relative; z-index: 2; padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+
+    .gallery-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .gallery-main-img {
+      width: 100%; max-height: 340px; object-fit: contain; border-radius: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.8); background: rgba(0, 0, 0, 0.2);
+    }
+    .gallery-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+    .gallery-thumb-item {
+      width: 65px; height: 65px; object-fit: cover; border-radius: 8px;
+      border: 2px solid transparent; cursor: pointer; opacity: 0.65; transition: all 0.2s; background: rgba(0,0,0,0.1);
+    }
+    .gallery-thumb-item.active, .gallery-thumb-item:hover { opacity: 1; border-color: rgba(33, 150, 243, 0.9); transform: scale(1.05); }
+
+    .settings-btn { position: fixed; bottom: 25px; right: 25px; width: 54px; height: 54px; border-radius: 50%; background: var(--accent-button); border: 1.5px solid var(--accent-button-border); color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .settings-modal { position: fixed; bottom: 90px; right: 25px; width: 340px; padding: 22px; display: none; z-index: 1001; }
+    .settings-modal.active { display: block; }
+    .color-options { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .color-swatch { width: 100%; height: 32px; border-radius: 8px; border: 1.5px solid #fff; cursor: pointer; }
+    .swatch-azul { background: linear-gradient(135deg, #0b4f8a, #1e88e5); }
+    .swatch-vermelho { background: linear-gradient(135deg, #7a0c0c, #d32f2f); }
+    .swatch-laranja { background: linear-gradient(135deg, #7c3600, #f57c00); }
+    .swatch-verde { background: linear-gradient(135deg, #094e24, #2e7d32); }
+    .swatch-roxo { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+    .swatch-preto { background: linear-gradient(135deg, #121212, #37474f); }
+  </style>
+</head>
+
+<body>
+
+  <header class="aero-window">
+    <div style="display: flex; align-items: center;">
+      <a href="pagina_inicial.html" class="btn-action">← Voltar para Página Inicial</a>
+    </div>
+    
+    <div class="header-title">
+      <h1>📚 Wiki Dragon Ball</h1>
+    </div>
+
+    <div class="user-profile">
+      <span class="user-name" id="user-display-name">Carregando...</span>
+      <img src="" alt="Foto de Perfil" id="user-display-avatar" class="user-avatar">
+    </div>
+  </header>
+
+  <main>
+    <section class="search-filter-card aero-window">
+      <div class="search-box-wrapper">
+        <input type="text" id="wiki-search-input" class="search-input" placeholder="🔍 Pesquisar personagem, saga, transformação, técnica..." oninput="handleSearch()">
+      </div>
+
+      <div class="categories-bar">
+        <button class="cat-btn active" onclick="filterCategory('todas')">Todas</button>
+        <button class="cat-btn" onclick="filterCategory('personagens')">Personagens</button>
+        <button class="cat-btn" onclick="filterCategory('sagas')">Sagas / Arcos</button>
+        <button class="cat-btn" onclick="filterCategory('transformacoes')">Transformações</button>
+        <button class="cat-btn" onclick="filterCategory('tecnicas')">Técnicas</button>
+        <button class="cat-btn" onclick="filterCategory('itens')">Esferas & Itens</button>
+      </div>
+    </section>
+
+    <section class="wiki-grid" id="wiki-grid-container">
+      <div style="grid-column: 1/-1; text-align: center;">Carregando artigos...</div>
+    </section>
+  </main>
+
+  <!-- MODAL DE LEITURA COM GALERIA MULTI-IMAGEM -->
+  <div class="wiki-modal-overlay" id="wiki-article-modal">
+    <div class="wiki-modal-container aero-window">
+      <div class="wiki-modal-header">
+        <h2 id="modal-article-title">Título do Artigo</h2>
+        <button class="close-modal-btn" onclick="closeArticleModal()">✕</button>
+      </div>
+
+      <div class="wiki-modal-body">
+        <span class="wiki-card-badge" id="modal-article-badge">Categoria</span>
+        
+        <!-- ESTRUTURA DA GALERIA -->
+        <div class="gallery-container" id="modal-gallery-wrapper">
+          <img src="" id="modal-article-img" class="gallery-main-img" alt="Imagem Principal">
+          <div class="gallery-thumbs" id="modal-article-thumbs"></div>
+        </div>
+
+        <div style="font-size: 14.5px; line-height: 1.7;" id="modal-article-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="settings-btn" onclick="toggleSettingsModal()">⚙️</button>
+
+  <div class="settings-modal aero-window" id="settings-modal">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+      <h2 style="font-size: 15px;">Configurações</h2>
+      <button onclick="toggleSettingsModal()" style="border:none; background:none; cursor:pointer;">✕</button>
+    </div>
+    <div class="color-options">
+      <div class="color-swatch swatch-azul" onclick="setTheme('azul')"></div>
+      <div class="color-swatch swatch-vermelho" onclick="setTheme('vermelho')"></div>
+      <div class="color-swatch swatch-laranja" onclick="setTheme('laranja')"></div>
+      <div class="color-swatch swatch-verde" onclick="setTheme('verde')"></div>
+      <div class="color-swatch swatch-roxo" onclick="setTheme('roxo')"></div>
+      <div class="color-swatch swatch-preto" onclick="setTheme('preto')"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allArticles = [];
+    let currentCategory = "todas";
+
+    async function loadWikiArticles() {
+      const container = document.getElementById("wiki-grid-container");
+      try {
+        const { data, error } = await supabaseClient.from("wiki_artigos").select("*").order("id", { ascending: false });
+        if (error) throw error;
+
+        allArticles = data || [];
+        renderArticles();
+      } catch (err) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center;">Erro ao carregar enciclopédia.</div>`;
+      }
+    }
+
+    function renderArticles() {
+      const container = document.getElementById("wiki-grid-container");
+      const searchTerm = document.getElementById("wiki-search-input").value.toLowerCase().trim();
+
+      const filtered = allArticles.filter(art => {
+        const matchesCategory = currentCategory === "todas" || art.categoria === currentCategory;
+        const matchesSearch = art.titulo.toLowerCase().includes(searchTerm) || art.conteudo.toLowerCase().includes(searchTerm);
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center;">Nenhum artigo encontrado.</div>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      const defaultImg = "https://cdn-icons-png.flaticon.com/512/2232/2232688.png";
+
+      filtered.forEach(art => {
+        const card = document.createElement("div");
+        card.className = "wiki-card aero-window";
+        card.onclick = () => openArticleModal(art);
+
+        // Se houver várias URLs, pega a primeira para a capa do card
+        const imgList = art.imagem_url ? art.imagem_url.split(',').map(u => u.trim()).filter(u => u !== "") : [];
+        const firstImg = imgList.length > 0 ? imgList[0] : defaultImg;
+
+        card.innerHTML = `
+          <img src="${firstImg}" alt="${art.titulo}" class="wiki-card-img" onerror="this.src='${defaultImg}'">
+          <span class="wiki-card-badge">${art.categoria}</span>
+          <h3 class="wiki-card-title"></h3>
+          <p class="wiki-card-snippet"></p>
+        `;
+        card.querySelector(".wiki-card-title").textContent = art.titulo;
+        card.querySelector(".wiki-card-snippet").textContent = art.conteudo;
+        container.appendChild(card);
+      });
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderArticles();
+    }
+
+    function handleSearch() { renderArticles(); }
+
+    /* LÓGICA DE EXIBIR GALERIA COM MÚLTIPLAS IMAGENS NO MODAL */
+    function openArticleModal(art) {
+      document.getElementById("modal-article-title").textContent = art.titulo;
+      document.getElementById("modal-article-badge").textContent = art.categoria;
+      document.getElementById("modal-article-content").textContent = art.conteudo;
+
+      const mainImg = document.getElementById("modal-article-img");
+      const thumbsContainer = document.getElementById("modal-article-thumbs");
+      thumbsContainer.innerHTML = "";
+
+      // Transforma a string de URLs em Array
+      const imagesList = art.imagem_url ? art.imagem_url.split(',').map(u => u.trim()).filter(u => u !== "") : [];
+
+      if (imagesList.length > 0) {
+        document.getElementById("modal-gallery-wrapper").style.display = "flex";
+        mainImg.src = imagesList[0]; // Imagem inicial
+
+        // Se tiver mais de 1 imagem, cria as miniaturas clicáveis
+        if (imagesList.length > 1) {
+          imagesList.forEach((url, index) => {
+            const thumb = document.createElement("img");
+            thumb.src = url;
+            thumb.className = `gallery-thumb-item ${index === 0 ? 'active' : ''}`;
+            thumb.onclick = () => {
+              mainImg.src = url;
+              document.querySelectorAll('.gallery-thumb-item').forEach(t => t.classList.remove('active'));
+              thumb.classList.add('active');
+            };
+            thumbsContainer.appendChild(thumb);
+          });
+        }
+      } else {
+        document.getElementById("modal-gallery-wrapper").style.display = "none";
+      }
+
+      document.getElementById("wiki-article-modal").classList.add("active");
+    }
+
+    function closeArticleModal() {
+      document.getElementById("wiki-article-modal").classList.remove("active");
+    }
+
+    function toggleSettingsModal() { document.getElementById("settings-modal").classList.toggle("active"); }
+    function setTheme(name) { document.body.className = name === 'azul' ? '' : `theme-${name}`; localStorage.setItem("dba_theme", name); }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const sessionData = localStorage.getItem("userSession");
+      if (!sessionData) { window.location.href = "index.html"; return; }
+
+      const session = JSON.parse(sessionData);
+      document.getElementById("user-display-name").textContent = session.user.nome || "Usuário";
+      document.getElementById("user-display-avatar").src = session.user.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+      const savedTheme = localStorage.getItem("dba_theme");
+      if (savedTheme) setTheme(savedTheme);
+
+      loadWikiArticles();
+    });
+  </script>
+</body>
+</html>

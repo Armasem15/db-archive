@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Ball Archive - Painel do Administrador</title>
+
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b4f8a 0%, #1e88e5 45%, #00acc1 85%, #4caf50 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(224, 242, 254, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(30, 136, 229, 0.5);
+      --glass-glow: rgba(30, 136, 229, 0.3);
+      --text-title: #06233d;
+      --text-body: #0b2e4c;
+      --accent-button: linear-gradient(180deg, rgba(82, 178, 248, 0.8) 0%, rgba(30, 136, 229, 0.8) 50%, rgba(21, 101, 192, 0.85) 51%, rgba(25, 118, 210, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-vermelho {
+      --bg-gradient: linear-gradient(135deg, #7a0c0c 0%, #d32f2f 45%, #ff5722 85%, #ff9800 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 235, 238, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(211, 47, 47, 0.5);
+      --glass-glow: rgba(211, 47, 47, 0.3);
+      --text-title: #3b0505;
+      --text-body: #4a0909;
+      --accent-button: linear-gradient(180deg, rgba(255, 107, 107, 0.8) 0%, rgba(211, 47, 47, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-laranja {
+      --bg-gradient: linear-gradient(135deg, #7c3600 0%, #f57c00 45%, #ff9800 85%, #ffc107 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 243, 224, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(245, 124, 0, 0.5);
+      --glass-glow: rgba(245, 124, 0, 0.3);
+      --text-title: #3d1b00;
+      --text-body: #472100;
+      --accent-button: linear-gradient(180deg, rgba(255, 183, 77, 0.8) 0%, rgba(245, 124, 0, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-verde {
+      --bg-gradient: linear-gradient(135deg, #094e24 0%, #2e7d32 45%, #009688 85%, #8bc34a 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(232, 245, 233, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(46, 125, 50, 0.5);
+      --glass-glow: rgba(46, 125, 50, 0.3);
+      --text-title: #04240d;
+      --text-body: #0a3314;
+      --accent-button: linear-gradient(180deg, rgba(102, 187, 106, 0.8) 0%, rgba(46, 125, 50, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-roxo {
+      --bg-gradient: linear-gradient(135deg, #4a148c 0%, #7b1fa2 45%, #ab47bc 85%, #e91e63 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(243, 229, 245, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(123, 31, 162, 0.5);
+      --glass-glow: rgba(123, 31, 162, 0.3);
+      --text-title: #220042;
+      --text-body: #2d054d;
+      --accent-button: linear-gradient(180deg, rgba(171, 71, 188, 0.8) 0%, rgba(123, 31, 162, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-preto {
+      --bg-gradient: linear-gradient(135deg, #090d12 0%, #1a232a 50%, #2a373f 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(15, 23, 42, 0.35) 100%);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --glass-border-outer: rgba(0, 0, 0, 0.6);
+      --glass-glow: rgba(0, 0, 0, 0.5);
+      --text-title: #ffffff;
+      --text-body: #e2e8f0;
+      --accent-button: linear-gradient(180deg, rgba(71, 85, 105, 0.8) 0%, rgba(30, 41, 59, 0.85) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%), var(--bg-gradient);
+      background-size: cover; background-position: center; background-attachment: fixed;
+      color: var(--text-body); padding: 20px; display: flex; flex-direction: column; align-items: center;
+    }
+
+    .aero-window {
+      position: relative; background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(190%); -webkit-backdrop-filter: blur(22px) saturate(190%);
+      border-radius: 18px; border: 1.5px solid var(--glass-border); outline: 1px solid var(--glass-border-outer);
+      box-shadow: 0 20px 45px var(--glass-glow), 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 2px 2px rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 25px; margin-bottom: 25px;
+    }
+
+    .header-left { display: flex; align-items: center; }
+    .header-title { text-align: center; flex: 1; position: relative; z-index: 2; }
+    .header-title h1 { font-size: 24px; font-weight: 800; color: var(--text-title); }
+
+    .badge-adm {
+      font-size: 11px; font-weight: 800; background: rgba(220, 38, 38, 0.85); color: #ffffff;
+      padding: 3px 8px; border-radius: 12px; text-transform: uppercase; margin-left: 8px;
+    }
+
+    .user-profile {
+      position: relative; z-index: 2; display: flex; align-items: center; gap: 12px;
+      padding: 5px 14px; background: rgba(255, 255, 255, 0.4); border: 1px solid var(--glass-border); border-radius: 50px;
+    }
+
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+    .user-name { font-size: 13.5px; font-weight: 700; color: var(--text-title); }
+
+    main { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 25px; }
+
+    .btn-action {
+      padding: 10px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700; color: #ffffff;
+      background: var(--accent-button); border: 1px solid var(--accent-button-border);
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    .admin-card { width: 100%; padding: 25px; }
+    .card-title {
+      position: relative; z-index: 2; font-size: 18px; font-weight: 800; color: var(--text-title);
+      margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .post-form { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+
+    textarea, input, select {
+      width: 100%; padding: 10px 14px; border: 1.5px solid rgba(255, 255, 255, 0.8);
+      border-radius: 10px; font-size: 13.5px; outline: none; background: rgba(255, 255, 255, 0.6); color: var(--text-body);
+    }
+
+    textarea { min-height: 90px; resize: vertical; }
+
+    .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .updates-admin-list {
+      position: relative; z-index: 2; display: flex; flex-direction: column; gap: 10px;
+      max-height: 380px; overflow-y: auto;
+    }
+
+    .update-admin-item {
+      display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px; gap: 12px;
+    }
+
+    .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .btn-edit {
+      background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%); color: #ffffff;
+      border: 1px solid #e65100; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+
+    .btn-delete {
+      background: linear-gradient(180deg, #ef5350 0%, #d32f2f 100%); color: #ffffff;
+      border: 1px solid #b71c1c; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+
+    .btn-cancel {
+      background: linear-gradient(180deg, #9e9e9e 0%, #616161 100%); color: #ffffff;
+      border: 1px solid #424242; padding: 10px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer;
+    }
+
+    #adm-message {
+      position: relative; z-index: 2; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; margin-bottom: 12px;
+    }
+
+    #adm-message.success { display: block; background: rgba(200, 230, 201, 0.9); color: #1b5e20; }
+    #adm-message.error { display: block; background: rgba(255, 205, 210, 0.9); color: #b71c1c; }
+
+    .settings-btn { position: fixed; bottom: 25px; right: 25px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent-button); border: 1.5px solid var(--accent-button-border); color: #ffffff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .settings-modal { position: fixed; bottom: 90px; right: 25px; width: 320px; padding: 20px; display: none; z-index: 1001; }
+    .settings-modal.active { display: block; }
+  </style>
+</head>
+
+<body>
+
+  <header class="aero-window">
+    <div class="header-left">
+      <a href="pagina_inicial.html" class="btn-action">← Ir para Página Inicial</a>
+    </div>
+    
+    <div class="header-title">
+      <h1>Dragon Ball Archive <span class="badge-adm">ADMIN</span></h1>
+    </div>
+
+    <div class="user-profile">
+      <span class="user-name" id="user-display-name">Carregando...</span>
+      <img src="" alt="Foto de Perfil" id="user-display-avatar" class="user-avatar">
+    </div>
+  </header>
+
+  <main>
+    <div id="adm-message"></div>
+
+    <!-- SEÇÃO 1: GERENCIAR JOGOS ONLINE -->
+    <section class="admin-card aero-window">
+      <h2 class="card-title">🕹️ Enviar Novo Jogo Online</h2>
+      <form class="post-form" id="jogo-form">
+        <div class="grid-inputs">
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Nome do Jogo:</label>
+            <input type="text" id="jogo-nome" placeholder="Ex: Dragon Ball Z: Devolution" required>
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Tag / Categoria:</label>
+            <input type="text" id="jogo-tag" placeholder="Ex: Luta, Ação, Arcade, Flash" required>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: bold;">URL do Ícone do Jogo (Imagem):</label>
+          <input type="url" id="jogo-icone" placeholder="https://exemplo.com/icone.png" required>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: bold;">Link de Redirecionamento (URL do Jogo):</label>
+          <input type="url" id="jogo-link" placeholder="https://exemplo.com/jogar" required>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn-action" id="btn-jogo-save">🎮 Salvar Jogo</button>
+        </div>
+      </form>
+
+      <h2 class="card-title" style="margin-top: 15px;">🎮 Jogos Cadastrados</h2>
+      <div class="updates-admin-list" id="jogos-admin-list">
+        <div style="font-size: 13px; text-align: center;">Carregando jogos...</div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 2: GERENCIAR BANNERS DO TOPO (JOGOS) -->
+    <section class="admin-card aero-window">
+      <h2 class="card-title">🖼️ Adicionar Banner do Topo (Rotativo)</h2>
+      <form class="post-form" id="banner-form">
+        <div>
+          <label style="font-size: 12px; font-weight: bold;">URL da Imagem do Banner:</label>
+          <input type="url" id="banner-imagem" placeholder="https://exemplo.com/banner.png" required>
+        </div>
+
+        <div class="grid-inputs">
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Título / Legenda (Opcional):</label>
+            <input type="text" id="banner-titulo" placeholder="Ex: Jogue agora o novo Mod Flash!">
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Link de Redirecionamento (Opcional):</label>
+            <input type="url" id="banner-link" placeholder="https://exemplo.com/destino">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn-action" id="btn-banner-save">🖼️ Salvar Banner</button>
+        </div>
+      </form>
+
+      <h2 class="card-title" style="margin-top: 15px;">🖼️ Banners Ativos</h2>
+      <div class="updates-admin-list" id="banners-admin-list">
+        <div style="font-size: 13px; text-align: center;">Carregando banners...</div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 3: GERENCIAR WIKI DRAGON BALL -->
+    <section class="admin-card aero-window" id="sec-wiki-admin">
+      <h2 class="card-title" id="wiki-form-title">📚 Criar Novo Artigo na Wiki</h2>
+      
+      <form class="post-form" id="wiki-form">
+        <input type="hidden" id="wiki-id">
+
+        <div class="grid-inputs">
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Título do Artigo:</label>
+            <input type="text" id="wiki-titulo" placeholder="Ex: Goku (Super Saiyajin)" required>
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Categoria:</label>
+            <select id="wiki-categoria" required>
+              <option value="personagens">Personagens</option>
+              <option value="sagas">Sagas / Arcos</option>
+              <option value="transformacoes">Transformações</option>
+              <option value="tecnicas">Técnicas</option>
+              <option value="itens">Esferas & Itens</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: bold;">URL(s) da Imagem (separe por vírgula para galeria):</label>
+          <input type="text" id="wiki-imagem" placeholder="https://site.com/img1.png, https://site.com/img2.png">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: bold;">Conteúdo Completo do Artigo:</label>
+          <textarea id="wiki-conteudo" placeholder="Escreva aqui os detalhes completos..." required></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-cancel" id="btn-wiki-cancel" style="display: none;" onclick="resetWikiForm()">✕ Cancelar Edição</button>
+          <button type="submit" class="btn-action" id="btn-wiki-save">✨ Salvar Artigo na Wiki</button>
+        </div>
+      </form>
+
+      <h2 class="card-title" style="margin-top: 15px;">📖 Artigos Cadastrados na Wiki</h2>
+      <div class="updates-admin-list" id="wiki-admin-list">
+        <div style="font-size: 13px; text-align: center;">Carregando artigos da Wiki...</div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: PUBLICAR ATUALIZAÇÕES -->
+    <section class="admin-card aero-window">
+      <h2 class="card-title">📝 Publicar Atualização da Página Inicial</h2>
+      <form class="post-form" id="update-form">
+        <textarea id="update-text" placeholder="Escreva a atualização..." required style="min-height: 70px;"></textarea>
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn-action" id="btn-publish">📢 Publicar Atualização</button>
+        </div>
+      </form>
+
+      <h2 class="card-title" style="margin-top: 10px;">📋 Atualizações Ativas</h2>
+      <div class="updates-admin-list" id="updates-admin-list">
+        <div style="font-size: 13px; text-align: center;">Carregando atualizações...</div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 5: GERENCIAR ACERVO BUDOKAI TENKAICHI 3 -->
+    <section class="admin-card aero-window">
+      <h2 class="card-title">🎮 Postar no Acervo Budokai Tenkaichi 3</h2>
+      
+      <form class="post-form" id="bt3-form">
+        <div class="grid-inputs">
+          <div>
+            <label style="font-size: 12px; font-weight: bold;">Setor do Acervo:</label>
+            <select id="bt3-tipo" onchange="toggleCategorySelect()" required>
+              <option value="ferramenta">🛠️ Ferramentas</option>
+              <option value="mod">🎮 Mods</option>
+              <option value="iso">💿 ISO</option>
+              <option value="render">🖼️ Renders</option>
+              <option value="voz">🎙️ Voz</option>
+            </select>
+          </div>
+
+          <div id="cat-group" style="display: none;">
+            <label style="font-size: 12px; font-weight: bold;">Categoria do Mod:</label>
+            <select id="bt3-categoria">
+              <option value="Clássico">Clássico</option>
+              <option value="Z">Z</option>
+              <option value="GT">GT</option>
+              <option value="Heroes">Heroes</option>
+              <option value="Super">Super</option>
+              <option value="What if">What if</option>
+              <option value="extra">Extra</option>
+              <option value="AF">AF</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <input type="text" id="bt3-titulo" placeholder="Título / Nome do Item" required>
+        <input type="url" id="bt3-link" placeholder="Link do site / Download (URL)" required>
+        <input type="text" id="bt3-imagem" placeholder="URLs das Imagens separadas por vírgula (Opcional)">
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn-action" id="btn-bt3-save">📦 Salvar no Acervo BT3</button>
+        </div>
+      </form>
+
+      <h2 class="card-title" style="margin-top: 15px;">📦 Itens Cadastrados no Acervo BT3</h2>
+      <div class="updates-admin-list" id="bt3-admin-list">
+        <div style="font-size: 13px; text-align: center;">Carregando acervo BT3...</div>
+      </div>
+    </section>
+
+  </main>
+
+  <button class="settings-btn" onclick="toggleSettingsModal()">⚙️</button>
+
+  <div class="settings-modal aero-window" id="settings-modal">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+      <h3 style="font-size: 14px;">Configurações</h3>
+      <button onclick="toggleSettingsModal()" style="border:none; background:none; cursor:pointer;">✕</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px;">
+      <div style="height: 25px; background:#1e88e5; cursor:pointer;" onclick="setTheme('azul')"></div>
+      <div style="height: 25px; background:#d32f2f; cursor:pointer;" onclick="setTheme('vermelho')"></div>
+      <div style="height: 25px; background:#f57c00; cursor:pointer;" onclick="setTheme('laranja')"></div>
+      <div style="height: 25px; background:#2e7d32; cursor:pointer;" onclick="setTheme('verde')"></div>
+      <div style="height: 25px; background:#7b1fa2; cursor:pointer;" onclick="setTheme('roxo')"></div>
+      <div style="height: 25px; background:#121212; cursor:pointer;" onclick="setTheme('preto')"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const messageDiv = document.getElementById("adm-message");
+    let allWikiArticlesAdmin = [];
+
+    function showMsg(text, type = "success") {
+      messageDiv.textContent = text;
+      messageDiv.className = type;
+      setTimeout(() => { messageDiv.className = ""; messageDiv.textContent = ""; }, 4000);
+    }
+
+    /* =========================================================
+       1. GERENCIAMENTO DE JOGOS ONLINE
+       ========================================================= */
+    async function fetchAdminGames() {
+      const container = document.getElementById("jogos-admin-list");
+      try {
+        const { data, error } = await supabaseClient.from("jogos_online").select("*").order("id", { ascending: false });
+        if (error || !data || data.length === 0) {
+          container.innerHTML = `<div style="font-size: 13px; text-align: center;">Nenhum jogo cadastrado.</div>`;
+          return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(game => {
+          const div = document.createElement("div");
+          div.className = "update-admin-item";
+          div.innerHTML = `
+            <div style="font-size: 13px;">
+              <strong>[${game.tag}]</strong> ${game.nome}
+            </div>
+            <button class="btn-delete" onclick="deleteGame(${game.id})">🗑️ Excluir</button>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    document.getElementById("jogo-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const nome = document.getElementById("jogo-nome").value.trim();
+      const tag = document.getElementById("jogo-tag").value.trim();
+      const icone_url = document.getElementById("jogo-icone").value.trim();
+      const link_url = document.getElementById("jogo-link").value.trim();
+
+      if (!nome || !tag || !icone_url || !link_url) return;
+
+      const { error } = await supabaseClient.from("jogos_online").insert([{ nome, tag, icone_url, link_url }]);
+
+      if (error) showMsg(`Erro ao cadastrar jogo: ${error.message}`, "error");
+      else {
+        showMsg("Jogo cadastrado com sucesso!", "success");
+        document.getElementById("jogo-nome").value = "";
+        document.getElementById("jogo-tag").value = "";
+        document.getElementById("jogo-icone").value = "";
+        document.getElementById("jogo-link").value = "";
+        fetchAdminGames();
+      }
+    });
+
+    async function deleteGame(id) {
+      if (!confirm("Excluir este jogo?")) return;
+      const { error } = await supabaseClient.from("jogos_online").delete().eq("id", id);
+      if (error) showMsg(`Erro ao excluir: ${error.message}`, "error");
+      else { showMsg("Jogo excluído!", "success"); fetchAdminGames(); }
+    }
+
+
+    /* =========================================================
+       2. GERENCIAMENTO DE BANNERS DO TOPO
+       ========================================================= */
+    async function fetchAdminBanners() {
+      const container = document.getElementById("banners-admin-list");
+      try {
+        const { data, error } = await supabaseClient.from("jogos_banners").select("*").order("id", { ascending: false });
+        if (error || !data || data.length === 0) {
+          container.innerHTML = `<div style="font-size: 13px; text-align: center;">Nenhum banner ativo.</div>`;
+          return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(b => {
+          const div = document.createElement("div");
+          div.className = "update-admin-item";
+          div.innerHTML = `
+            <div style="font-size: 13px;">
+              🖼️ ${b.titulo || 'Banner sem título'}
+            </div>
+            <button class="btn-delete" onclick="deleteBanner(${b.id})">🗑️ Excluir</button>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    document.getElementById("banner-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const imagem_url = document.getElementById("banner-imagem").value.trim();
+      const titulo = document.getElementById("banner-titulo").value.trim();
+      const link_url = document.getElementById("banner-link").value.trim();
+
+      if (!imagem_url) return;
+
+      const { error } = await supabaseClient.from("jogos_banners").insert([{ imagem_url, titulo, link_url }]);
+
+      if (error) showMsg(`Erro ao cadastrar banner: ${error.message}`, "error");
+      else {
+        showMsg("Banner cadastrado com sucesso!", "success");
+        document.getElementById("banner-imagem").value = "";
+        document.getElementById("banner-titulo").value = "";
+        document.getElementById("banner-link").value = "";
+        fetchAdminBanners();
+      }
+    });
+
+    async function deleteBanner(id) {
+      if (!confirm("Excluir este banner?")) return;
+      const { error } = await supabaseClient.from("jogos_banners").delete().eq("id", id);
+      if (error) showMsg(`Erro ao excluir: ${error.message}`, "error");
+      else { showMsg("Banner excluído!", "success"); fetchAdminBanners(); }
+    }
+
+
+    /* =========================================================
+       3. WIKI, ATUALIZAÇÕES E ACERVO BT3 (EXISTENTES)
+       ========================================================= */
+    async function fetchWikiAdminArticles() {
+      const container = document.getElementById("wiki-admin-list");
+      try {
+        const { data, error } = await supabaseClient.from("wiki_artigos").select("*").order("id", { ascending: false });
+        if (error || !data || data.length === 0) {
+          container.innerHTML = `<div style="font-size: 13px; text-align: center;">Nenhum artigo na Wiki.</div>`;
+          return;
+        }
+
+        allWikiArticlesAdmin = data;
+        container.innerHTML = "";
+        data.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "update-admin-item";
+          div.innerHTML = `
+            <div style="font-size: 13px;"><strong>[${item.categoria.toUpperCase()}]</strong> ${item.titulo}</div>
+            <div class="item-actions">
+              <button class="btn-edit" onclick="startEditWikiArticle(${item.id})">✏️ Editar</button>
+              <button class="btn-delete" onclick="deleteWikiArticle(${item.id})">🗑️ Excluir</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    document.getElementById("wiki-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const articleId = document.getElementById("wiki-id").value;
+      const titulo = document.getElementById("wiki-titulo").value.trim();
+      const categoria = document.getElementById("wiki-categoria").value;
+      const imagem_url = document.getElementById("wiki-imagem").value.trim();
+      const conteudo = document.getElementById("wiki-conteudo").value.trim();
+
+      if (!titulo || !conteudo) return;
+      const payload = { titulo, categoria, imagem_url, conteudo };
+
+      if (articleId) {
+        await supabaseClient.from("wiki_artigos").update(payload).eq("id", articleId);
+        showMsg("Artigo atualizado!", "success");
+      } else {
+        await supabaseClient.from("wiki_artigos").insert([payload]);
+        showMsg("Novo artigo publicado!", "success");
+      }
+      resetWikiForm();
+      fetchWikiAdminArticles();
+    });
+
+    function startEditWikiArticle(id) {
+      const a = allWikiArticlesAdmin.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById("wiki-id").value = a.id;
+      document.getElementById("wiki-titulo").value = a.titulo;
+      document.getElementById("wiki-categoria").value = a.categoria;
+      document.getElementById("wiki-imagem").value = a.imagem_url || "";
+      document.getElementById("wiki-conteudo").value = a.conteudo;
+
+      document.getElementById("wiki-form-title").textContent = "✏️ Editar Artigo da Wiki";
+      document.getElementById("btn-wiki-save").textContent = "💾 Atualizar Artigo";
+      document.getElementById("btn-wiki-cancel").style.display = "inline-flex";
+      document.getElementById("sec-wiki-admin").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetWikiForm() {
+      document.getElementById("wiki-id").value = "";
+      document.getElementById("wiki-titulo").value = "";
+      document.getElementById("wiki-imagem").value = "";
+      document.getElementById("wiki-conteudo").value = "";
+      document.getElementById("wiki-form-title").textContent = "📚 Criar Novo Artigo na Wiki";
+      document.getElementById("btn-wiki-save").textContent = "✨ Salvar Artigo na Wiki";
+      document.getElementById("btn-wiki-cancel").style.display = "none";
+    }
+
+    async function deleteWikiArticle(id) {
+      if (!confirm("Excluir artigo?")) return;
+      await supabaseClient.from("wiki_artigos").delete().eq("id", id);
+      showMsg("Artigo excluído!", "success");
+      fetchWikiAdminArticles();
+    }
+
+    async function fetchAdminUpdates() {
+      const container = document.getElementById("updates-admin-list");
+      try {
+        const { data } = await supabaseClient.from("atualizacoes").select("*").order("id", { ascending: false });
+        if (!data || data.length === 0) { container.innerHTML = `<div style="font-size: 13px; text-align: center;">Nenhuma atualização.</div>`; return; }
+        container.innerHTML = "";
+        data.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "update-admin-item";
+          div.innerHTML = `<div style="font-size: 13px;">${item.texto}</div><button class="btn-delete" onclick="deleteUpdate(${item.id})">🗑️ Excluir</button>`;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    document.getElementById("update-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const texto = document.getElementById("update-text").value.trim();
+      if (!texto) return;
+      await supabaseClient.from("atualizacoes").insert([{ texto }]);
+      showMsg("Atualização publicada!", "success");
+      document.getElementById("update-text").value = "";
+      fetchAdminUpdates();
+    });
+
+    async function deleteUpdate(id) {
+      if (!confirm("Excluir atualização?")) return;
+      await supabaseClient.from("atualizacoes").delete().eq("id", id);
+      fetchAdminUpdates();
+    }
+
+    function toggleCategorySelect() {
+      const tipo = document.getElementById("bt3-tipo").value;
+      document.getElementById("cat-group").style.display = tipo === 'mod' ? 'block' : 'none';
+    }
+
+    async function fetchBT3AdminItems() {
+      const container = document.getElementById("bt3-admin-list");
+      try {
+        const { data } = await supabaseClient.from("bt3_acervo").select("*").order("id", { ascending: false });
+        if (!data || data.length === 0) { container.innerHTML = `<div style="font-size: 13px; text-align: center;">Nenhum item no acervo BT3.</div>`; return; }
+        container.innerHTML = "";
+        data.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "update-admin-item";
+          div.innerHTML = `<div style="font-size: 13px;"><strong>[${item.tipo.toUpperCase()}]</strong> ${item.titulo}</div><button class="btn-delete" onclick="deleteBT3Item(${item.id})">🗑️ Excluir</button>`;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    document.getElementById("bt3-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const tipo = document.getElementById("bt3-tipo").value;
+      const titulo = document.getElementById("bt3-titulo").value.trim();
+      const link_url = document.getElementById("bt3-link").value.trim();
+      const imagem_url = document.getElementById("bt3-imagem").value.trim();
+      const categoria = tipo === 'mod' ? document.getElementById("bt3-categoria").value : null;
+
+      if (!titulo || !link_url) return;
+      await supabaseClient.from("bt3_acervo").insert([{ tipo, titulo, link_url, imagem_url, categoria }]);
+      showMsg("Item salvo no BT3!", "success");
+      document.getElementById("bt3-titulo").value = "";
+      document.getElementById("bt3-link").value = "";
+      document.getElementById("bt3-imagem").value = "";
+      fetchBT3AdminItems();
+    });
+
+    async function deleteBT3Item(id) {
+      if (!confirm("Excluir item BT3?")) return;
+      await supabaseClient.from("bt3_acervo").delete().eq("id", id);
+      fetchBT3AdminItems();
+    }
+
+    function toggleSettingsModal() { document.getElementById("settings-modal").classList.toggle("active"); }
+    function setTheme(name) { document.body.className = name === 'azul' ? '' : `theme-${name}`; localStorage.setItem("dba_theme", name); }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const sessionData = localStorage.getItem("userSession");
+      if (!sessionData) { window.location.href = "index.html"; return; }
+
+      const session = JSON.parse(sessionData);
+      if (session.role !== "admin") { alert("Acesso restrito."); window.location.href = "pagina_inicial.html"; return; }
+
+      document.getElementById("user-display-name").textContent = session.user.nome || "Admin";
+      document.getElementById("user-display-avatar").src = session.user.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+      const savedTheme = localStorage.getItem("dba_theme");
+      if (savedTheme) setTheme(savedTheme);
+
+      fetchAdminGames();
+      fetchAdminBanners();
+      fetchWikiAdminArticles();
+      fetchAdminUpdates();
+      fetchBT3AdminItems();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login e Cadastro</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: 
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(129, 212, 250, 0.3) 0%, transparent 50%),
+        linear-gradient(135deg, #0b4f8a 0%, #1e88e5 45%, #00acc1 85%, #4caf50 100%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 430px;
+      padding: 35px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 248, 255, 0.82) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 
+        0 20px 50px rgba(7, 34, 61, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 1),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 48px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+    }
+
+    h1 {
+      text-align: center;
+      color: #0c3559;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #45627d;
+      margin-bottom: 28px;
+      line-height: 1.5;
+      font-size: 14px;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .role-button {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid #8ab8e6;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #ffffff 0%, #e1effe 50%, #bce0fd 51%, #d5e9ff 100%);
+      color: #0b3761;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 
+        inset 0 1px 0 #ffffff,
+        0 2px 5px rgba(0, 40, 80, 0.15);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .role-button:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #edf5ff 50%, #cbe5fe 51%, #e3f1ff 100%);
+      border-color: #3b8ad9;
+      box-shadow: 
+        inset 0 1px 0 #ffffff,
+        0 4px 12px rgba(30, 136, 229, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .role-button:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 4px rgba(0, 30, 60, 0.2);
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #52b2f8 0%, #1e88e5 50%, #1565c0 51%, #1976d2 100%);
+      color: #ffffff;
+      border: 1px solid #104d8c;
+      margin-top: 10px;
+      text-shadow: 0 -1px 0 rgba(0, 25, 60, 0.6);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 3px 8px rgba(15, 76, 129, 0.35);
+    }
+
+    .primary:hover {
+      background: linear-gradient(180deg, #6ec0fd 0%, #2196f3 50%, #1868c7 51%, #1e88e5 100%);
+      border-color: #093b6e;
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 5px 14px rgba(30, 136, 229, 0.45);
+    }
+
+    .primary:disabled {
+      background: linear-gradient(180deg, #bdc8d6 0%, #94a3b8 100%);
+      border-color: #78889b;
+      color: #e2e8f0;
+      text-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #173859;
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="file"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #9cbcdb;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      background: linear-gradient(180deg, #f2f7fc 0%, #ffffff 100%);
+      box-shadow: inset 0 2px 3px rgba(0, 30, 60, 0.08);
+      transition: all 0.2s;
+      color: #0f2d4a;
+    }
+
+    input[type="password"] {
+      padding-right: 40px;
+    }
+
+    input[type="file"] {
+      background: #ffffff;
+      padding: 8px 12px;
+    }
+
+    input:focus {
+      border-color: #2196f3;
+      background: #ffffff;
+      box-shadow: 
+        inset 0 1px 2px rgba(0, 0, 0, 0.05),
+        0 0 8px rgba(33, 150, 243, 0.4);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #546e7a;
+      transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+      color: #0288d1;
+    }
+
+    .toggle-mode {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #0077cc;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 700;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .toggle-mode:hover {
+      color: #004499;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .back {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      background: transparent;
+      color: #45627d;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .back:hover {
+      color: #0b3761;
+      text-decoration: underline;
+    }
+
+    #message {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    #message.error {
+      display: block;
+      background: linear-gradient(180deg, #ffebee 0%, #ffcdd2 100%);
+      color: #b71c1c;
+      border: 1px solid #ef9a9a;
+    }
+
+    #message.success {
+      display: block;
+      background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #64748b;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <div class="logo"></div>
+
+    <h1 id="main-title">Dragon Ball Archive</h1>
+    <p class="subtitle" id="subtitle">
+      Bem-vindo! Selecione seu tipo de acesso.
+    </p>
+
+    <section id="role-selection">
+      <button class="role-button" onclick="showForm('admin')">
+         Entrar como Administrador
+      </button>
+
+      <button class="role-button" onclick="showForm('professor')">
+         Entrar como usuário padrão
+      </button>
+    </section>
+
+    <form id="auth-form" class="hidden">
+      <div class="field">
+        <label for="nome">Nome do Usuário</label>
+        <div class="input-wrapper">
+          <input id="nome" name="nome" type="text" autocomplete="username" placeholder="Digite seu nome completo">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="senha">Senha</label>
+        <div class="input-wrapper">
+          <input id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Digite sua senha">
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" aria-label="Mostrar ou ocultar senha">👁️</button>
+        </div>
+      </div>
+
+      <div class="field hidden" id="email-field">
+        <label for="email">E-mail</label>
+        <div class="input-wrapper">
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="Gokufoda@gmail.com">
+        </div>
+      </div>
+
+      <div class="field hidden" id="foto-field">
+        <label for="foto">Foto de Perfil</label>
+        <div class="input-wrapper">
+          <input id="foto" name="foto" type="file" accept="image/*">
+        </div>
+      </div>
+
+      <button class="role-button primary" type="submit" id="submit-button">
+        Entrar
+      </button>
+
+      <div id="toggle-mode-btn" class="toggle-mode hidden" onclick="toggleAuthMode()">
+        Não tem conta? Cadastre-se
+      </div>
+
+      <button class="back" type="button" onclick="backToRoles()">
+        ← Voltar para seleção de perfil
+      </button>
+    </form>
+
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <div class="footer">
+      Sistema de Gestão de Biblioteca Escolar © 2026
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const CONFIG = {
+      admin: { table: "adm", role: "Administrador", redirectUrl: "Painel_adm.html" },
+      professor: { table: "user", role: "user", redirectUrl: "pagina_inicial.html" }
+    };
+
+    let selectedRole = null;
+    let isRegistering = false;
+
+    const selection = document.getElementById("role-selection");
+    const form = document.getElementById("auth-form");
+    const subtitle = document.getElementById("subtitle");
+    const message = document.getElementById("message");
+    const emailField = document.getElementById("email-field");
+    const fotoField = document.getElementById("foto-field");
+    const submitButton = document.getElementById("submit-button");
+    const toggleModeBtn = document.getElementById("toggle-mode-btn");
+
+    function showMessage(text, type = "error") {
+      message.textContent = text;
+      message.className = type;
+    }
+
+    function clearMessage() {
+      message.textContent = "";
+      message.className = "";
+    }
+
+    function togglePasswordVisibility() {
+      const senhaInput = document.getElementById("senha");
+      senhaInput.type = senhaInput.type === "password" ? "text" : "password";
+    }
+
+    function updateFormState() {
+      const titles = {
+        admin: isRegistering ? "Cadastro de Administrador" : "Acesso de Administrador",
+        professor: isRegistering ? "Cadastro de user" : "Acesso de user"
+      };
+
+      subtitle.textContent = titles[selectedRole];
+      submitButton.textContent = isRegistering ? "Cadastrar" : "Entrar";
+      toggleModeBtn.textContent = isRegistering ? "Já tem uma conta? Faça login" : "Não tem conta? Cadastre-se";
+
+      if (selectedRole === "admin") {
+        toggleModeBtn.classList.add("hidden");
+      } else {
+        toggleModeBtn.classList.remove("hidden");
+      }
+
+      fotoField.classList.toggle("hidden", !isRegistering);
+    }
+
+    function showForm(role) {
+      selectedRole = role;
+      isRegistering = false;
+      clearMessage();
+
+      selection.classList.add("hidden");
+      form.classList.remove("hidden");
+
+      emailField.classList.toggle("hidden", role !== "professor");
+      document.getElementById("email").required = (role === "professor");
+
+      updateFormState();
+      document.getElementById("nome").focus();
+    }
+
+    function toggleAuthMode() {
+      isRegistering = !isRegistering;
+      clearMessage();
+      updateFormState();
+    }
+
+    function backToRoles() {
+      form.classList.add("hidden");
+      selection.classList.remove("hidden");
+      form.reset();
+      selectedRole = null;
+      isRegistering = false;
+      clearMessage();
+      subtitle.textContent = "Bem-vindo! Selecione seu tipo de acesso.";
+    }
+
+    async function uploadProfilePicture(file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${selectedRole}/${fileName}`;
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw new Error(`Erro ao salvar foto: ${uploadError.message}`);
+      }
+
+      const { data: publicUrlData } = supabaseClient
+        .storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      return publicUrlData.publicUrl;
+    }
+
+    form.addEventListener("submit", async function(event) {
+      event.preventDefault();
+      clearMessage();
+
+      const nome = document.getElementById("nome").value.trim();
+      const senha = document.getElementById("senha").value;
+      const fotoInput = document.getElementById("foto");
+
+      if (!nome || !senha || !selectedRole) {
+        showMessage("Preencha todos os campos obrigatórios.");
+        return;
+      }
+
+      const config = CONFIG[selectedRole];
+      const payload = { nome, senha };
+
+      if (selectedRole === "professor") {
+        payload.email = document.getElementById("email").value.trim();
+        if (!payload.email) {
+          showMessage("Informe seu e-mail.");
+          return;
+        }
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = isRegistering ? "Cadastrando..." : "Verificando...";
+
+      try {
+        if (isRegistering) {
+          if (fotoInput.files.length > 0) {
+            submitButton.textContent = "Enviando foto...";
+            payload.foto_perfil = await uploadProfilePicture(fotoInput.files[0]);
+          }
+
+          submitButton.textContent = "Cadastrando...";
+          const { error } = await supabaseClient
+            .from(config.table)
+            .insert([payload]);
+
+          if (error) {
+            console.error("Erro detalhado do Supabase:", error);
+            if (error.code === '23505') {
+              showMessage("Já existe um cadastro com esses dados.");
+            } else {
+              showMessage(`Erro ao cadastrar: ${error.message}`);
+            }
+            return;
+          }
+
+          showMessage("Cadastro realizado com sucesso! Você já pode entrar.", "success");
+          setTimeout(() => {
+            toggleAuthMode();
+          }, 1500);
+
+        } else {
+          let query = supabaseClient
+            .from(config.table)
+            .select("*")
+            .eq("nome", payload.nome)
+            .eq("senha", payload.senha);
+
+          if (selectedRole === "professor") query = query.eq("email", payload.email);
+
+          const { data, error } = await query.limit(1).maybeSingle();
+
+          if (error) {
+            console.error("Erro no Supabase:", error);
+            showMessage("Erro ao consultar o banco. Verifique permissões RLS ou conexão.");
+            return;
+          }
+
+          if (!data) {
+            showMessage("Dados incorretos ou usuário não encontrado.");
+            return;
+          }
+
+          localStorage.setItem("userSession", JSON.stringify({
+            user: data,
+            role: selectedRole,
+            loginAt: new Date().toISOString()
+          }));
+
+          showMessage(`Login validado com sucesso! Redirecionando...`, "success");
+
+          setTimeout(() => {
+            window.location.href = config.redirectUrl;
+          }, 1000);
+        }
+
+      } catch (err) {
+        console.error("Erro inesperado:", err);
+        showMessage(err.message || "Falha na conexão. Tente novamente.");
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = isRegistering ? "Cadastrar" : "Entrar";
+      }
+    });
+  </script>
+</body>
+</html>

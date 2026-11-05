@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Ball Archive - Jogos Online</title>
+
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* =========================================================
+       VARIÁVEIS DE TEMA (Windows 7 Aero Glass Translúcido)
+       ========================================================= */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b4f8a 0%, #1e88e5 45%, #00acc1 85%, #4caf50 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(224, 242, 254, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(30, 136, 229, 0.5);
+      --glass-glow: rgba(30, 136, 229, 0.3);
+      --text-title: #06233d;
+      --text-body: #0b2e4c;
+      --accent-button: linear-gradient(180deg, rgba(82, 178, 248, 0.8) 0%, rgba(30, 136, 229, 0.8) 50%, rgba(21, 101, 192, 0.85) 51%, rgba(25, 118, 210, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-vermelho {
+      --bg-gradient: linear-gradient(135deg, #7a0c0c 0%, #d32f2f 45%, #ff5722 85%, #ff9800 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 235, 238, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(211, 47, 47, 0.5);
+      --glass-glow: rgba(211, 47, 47, 0.3);
+      --text-title: #3b0505;
+      --text-body: #4a0909;
+      --accent-button: linear-gradient(180deg, rgba(255, 107, 107, 0.8) 0%, rgba(211, 47, 47, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-laranja {
+      --bg-gradient: linear-gradient(135deg, #7c3600 0%, #f57c00 45%, #ff9800 85%, #ffc107 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 243, 224, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(245, 124, 0, 0.5);
+      --glass-glow: rgba(245, 124, 0, 0.3);
+      --text-title: #3d1b00;
+      --text-body: #472100;
+      --accent-button: linear-gradient(180deg, rgba(255, 183, 77, 0.8) 0%, rgba(245, 124, 0, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-verde {
+      --bg-gradient: linear-gradient(135deg, #094e24 0%, #2e7d32 45%, #009688 85%, #8bc34a 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(232, 245, 233, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(46, 125, 50, 0.5);
+      --glass-glow: rgba(46, 125, 50, 0.3);
+      --text-title: #04240d;
+      --text-body: #0a3314;
+      --accent-button: linear-gradient(180deg, rgba(102, 187, 106, 0.8) 0%, rgba(46, 125, 50, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-roxo {
+      --bg-gradient: linear-gradient(135deg, #4a148c 0%, #7b1fa2 45%, #ab47bc 85%, #e91e63 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(243, 229, 245, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(123, 31, 162, 0.5);
+      --glass-glow: rgba(123, 31, 162, 0.3);
+      --text-title: #220042;
+      --text-body: #2d054d;
+      --accent-button: linear-gradient(180deg, rgba(171, 71, 188, 0.8) 0%, rgba(123, 31, 162, 0.8) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-preto {
+      --bg-gradient: linear-gradient(135deg, #090d12 0%, #1a232a 50%, #2a373f 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(15, 23, 42, 0.35) 100%);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --glass-border-outer: rgba(0, 0, 0, 0.6);
+      --glass-glow: rgba(0, 0, 0, 0.5);
+      --text-title: #ffffff;
+      --text-body: #e2e8f0;
+      --accent-button: linear-gradient(180deg, rgba(71, 85, 105, 0.8) 0%, rgba(30, 41, 59, 0.85) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%), var(--bg-gradient);
+      background-size: cover; background-position: center; background-attachment: fixed;
+      color: var(--text-body); padding: 20px; display: flex; flex-direction: column; align-items: center;
+    }
+
+    .aero-window {
+      position: relative; background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(190%); -webkit-backdrop-filter: blur(22px) saturate(190%);
+      border-radius: 18px; border: 1.5px solid var(--glass-border); outline: 1px solid var(--glass-border-outer);
+      box-shadow: 0 20px 45px var(--glass-glow), 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 2px 2px rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+    }
+
+    .aero-window::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none; border-radius: 16px 16px 0 0;
+    }
+
+    header {
+      width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 25px; margin-bottom: 25px;
+    }
+
+    .header-title { text-align: center; flex: 1; position: relative; z-index: 2; }
+    .header-title h1 { font-size: 26px; font-weight: 800; color: var(--text-title); text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9); }
+
+    .btn-action {
+      padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #ffffff;
+      background: var(--accent-button); border: 1px solid var(--accent-button-border);
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .user-profile {
+      position: relative; z-index: 2; display: flex; align-items: center; gap: 12px;
+      padding: 5px 14px 5px 18px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+      backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 50px; min-width: 170px; justify-content: flex-end;
+    }
+
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.9); }
+    .user-name { font-size: 13.5px; font-weight: 700; color: var(--text-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+
+    main { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 25px; }
+
+    /* =========================================================
+       CARROSSEL DE BANNERS DO TOPO (RETRO FLASH STYLE)
+       ========================================================= */
+    .banner-carousel-container {
+      width: 100%; height: 260px; position: relative; overflow: hidden; border-radius: 18px;
+      border: 2px solid var(--glass-border); box-shadow: 0 12px 30px var(--glass-glow);
+    }
+
+    .banner-slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: center; justify-content: center;
+      background-size: cover; background-position: center; text-decoration: none;
+    }
+
+    .banner-slide.active { opacity: 1; z-index: 2; }
+
+    .banner-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.85) 100%);
+      color: #ffffff; padding: 25px 20px 15px 20px; font-size: 18px; font-weight: 800;
+      text-shadow: 0 2px 4px #000;
+    }
+
+    .carousel-indicators {
+      position: absolute; bottom: 12px; right: 20px; z-index: 10;
+      display: flex; gap: 6px;
+    }
+
+    .carousel-dot {
+      width: 12px; height: 12px; border-radius: 50%; background: rgba(255, 255, 255, 0.5);
+      border: 1px solid #000; cursor: pointer; transition: all 0.3s;
+    }
+
+    .carousel-dot.active { background: #ffcc00; transform: scale(1.3); border-color: #fff; }
+
+    /* BARRA DE NAVEGAÇÃO / FILTROS DE JOGOS */
+    .games-filter-card {
+      width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .search-box-wrapper { position: relative; z-index: 2; width: 100%; }
+
+    .search-input {
+      width: 100%; padding: 12px 18px; border: 1.5px solid rgba(255, 255, 255, 0.8); border-radius: 12px;
+      font-size: 14.5px; outline: none; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); color: var(--text-body);
+    }
+
+    .tags-bar { position: relative; z-index: 2; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tag-btn {
+      padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 800;
+      background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.7);
+      color: var(--text-title); cursor: pointer; transition: all 0.2s ease;
+    }
+
+    .tag-btn:hover, .tag-btn.active {
+      background: var(--accent-button); color: #ffffff; border-color: var(--accent-button-border); box-shadow: 0 3px 10px var(--glass-glow);
+    }
+
+    /* GRID DE JOGOS FLASH */
+    .games-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; width: 100%;
+    }
+
+    .game-card {
+      position: relative; z-index: 2; text-decoration: none; color: var(--text-body);
+      display: flex; flex-direction: column; align-items: center; padding: 12px;
+      border-radius: 14px; transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .game-card:hover {
+      transform: translateY(-5px) scale(1.03); background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 10px 25px var(--glass-glow), 0 0 15px rgba(255, 204, 0, 0.6);
+    }
+
+    .game-icon-wrapper {
+      position: relative; width: 110px; height: 110px; border-radius: 14px; overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      margin-bottom: 10px; background: #000;
+    }
+
+    .game-icon-img { width: 100%; height: 100%; object-fit: cover; }
+
+    .game-title {
+      font-size: 13px; font-weight: 800; text-align: center; color: var(--text-title);
+      word-break: break-word; line-height: 1.3; margin-bottom: 4px;
+    }
+
+    .game-tag-badge {
+      font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 7px;
+      border-radius: 8px; background: rgba(255, 255, 255, 0.6); color: var(--text-title);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .empty-games {
+      grid-column: 1 / -1; padding: 40px; text-align: center; font-size: 14px; color: var(--text-body);
+    }
+
+    /* CONFIGURAÇÕES MODAL */
+    .settings-btn { position: fixed; bottom: 25px; right: 25px; width: 54px; height: 54px; border-radius: 50%; background: var(--accent-button); border: 1.5px solid var(--accent-button-border); color: #ffffff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .settings-modal { position: fixed; bottom: 90px; right: 25px; width: 320px; padding: 20px; display: none; z-index: 1001; }
+    .settings-modal.active { display: block; }
+    .color-options { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .color-swatch { width: 100%; height: 32px; border-radius: 8px; border: 1.5px solid #fff; cursor: pointer; }
+    .swatch-azul { background: linear-gradient(135deg, #0b4f8a, #1e88e5); }
+    .swatch-vermelho { background: linear-gradient(135deg, #7a0c0c, #d32f2f); }
+    .swatch-laranja { background: linear-gradient(135deg, #7c3600, #f57c00); }
+    .swatch-verde { background: linear-gradient(135deg, #094e24, #2e7d32); }
+    .swatch-roxo { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+    .swatch-preto { background: linear-gradient(135deg, #121212, #37474f); }
+  </style>
+</head>
+
+<body>
+
+  <header class="aero-window">
+    <div style="display: flex; align-items: center;">
+      <a href="pagina_inicial.html" class="btn-action">← Voltar para Página Inicial</a>
+    </div>
+    
+    <div class="header-title">
+      <h1>🎮 Jogos Online Dragon Ball</h1>
+    </div>
+
+    <div class="user-profile">
+      <span class="user-name" id="user-display-name">Carregando...</span>
+      <img src="" alt="Foto de Perfil" id="user-display-avatar" class="user-avatar">
+    </div>
+  </header>
+
+  <main>
+    
+    <!-- CARROSSEL ROTATIVO DE BANNERS NO TOPO -->
+    <section class="banner-carousel-container aero-window" id="banner-carousel">
+      <div id="carousel-slides-wrapper">
+        <div class="banner-slide active" style="background-image: linear-gradient(135deg, #1e88e5, #00acc1);">
+          <div class="banner-caption">🕹️ Carregando destaques de jogos...</div>
+        </div>
+      </div>
+      <div class="carousel-indicators" id="carousel-dots"></div>
+    </section>
+
+    <!-- BARRA DE BUSCA E FILTROS DE TAG -->
+    <section class="games-filter-card aero-window">
+      <div class="search-box-wrapper">
+        <input type="text" id="game-search-input" class="search-input" placeholder="🔍 Buscar jogo por nome ou categoria..." oninput="handleSearch()">
+      </div>
+
+      <div class="tags-bar" id="tags-bar-container">
+        <button class="tag-btn active" onclick="filterTag('todas')">Todos os Jogos</button>
+      </div>
+    </section>
+
+    <!-- GRID DE JOGOS -->
+    <section class="games-grid" id="games-grid-container">
+      <div class="empty-games aero-window">Carregando acervo de jogos...</div>
+    </section>
+
+  </main>
+
+  <button class="settings-btn" onclick="toggleSettingsModal()">⚙️</button>
+
+  <div class="settings-modal aero-window" id="settings-modal">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+      <h2 style="font-size: 15px;">Configurações</h2>
+      <button onclick="toggleSettingsModal()" style="border:none; background:none; cursor:pointer;">✕</button>
+    </div>
+    <div class="color-options">
+      <div class="color-swatch swatch-azul" onclick="setTheme('azul')"></div>
+      <div class="color-swatch swatch-vermelho" onclick="setTheme('vermelho')"></div>
+      <div class="color-swatch swatch-laranja" onclick="setTheme('laranja')"></div>
+      <div class="color-swatch swatch-verde" onclick="setTheme('verde')"></div>
+      <div class="color-swatch swatch-roxo" onclick="setTheme('roxo')"></div>
+      <div class="color-swatch swatch-preto" onclick="setTheme('preto')"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allGames = [];
+    let allBanners = [];
+    let currentTag = "todas";
+    let bannerInterval = null;
+    let currentBannerIndex = 0;
+
+    /* =========================================================
+       1. BUSCAR E RENDERIZAR BANNERS DO CARROSSEL
+       ========================================================= */
+    async function loadBanners() {
+      try {
+        const { data, error } = await supabaseClient
+          .from("jogos_banners")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (error || !data || data.length === 0) {
+          showDefaultBanner();
+          return;
+        }
+
+        allBanners = data;
+        renderCarouselSlides();
+        startCarouselTimer();
+
+      } catch (err) {
+        showDefaultBanner();
+      }
+    }
+
+    function showDefaultBanner() {
+      const wrapper = document.getElementById("carousel-slides-wrapper");
+      wrapper.innerHTML = `
+        <div class="banner-slide active" style="background-image: linear-gradient(135deg, #0b4f8a, #1e88e5);">
+          <div class="banner-caption">⚡ Acervo de Jogos Flash de Dragon Ball!</div>
+        </div>
+      `;
+    }
+
+    function renderCarouselSlides() {
+      const wrapper = document.getElementById("carousel-slides-wrapper");
+      const dotsContainer = document.getElementById("carousel-dots");
+      wrapper.innerHTML = "";
+      dotsContainer.innerHTML = "";
+
+      allBanners.forEach((banner, idx) => {
+        const slide = document.createElement("a");
+        slide.className = `banner-slide ${idx === 0 ? 'active' : ''}`;
+        slide.style.backgroundImage = `url('${banner.imagem_url}')`;
+        if (banner.link_url) {
+          slide.href = banner.link_url;
+          slide.target = "_blank";
+        }
+
+        if (banner.titulo) {
+          slide.innerHTML = `<div class="banner-caption">${banner.titulo}</div>`;
+        }
+
+        wrapper.appendChild(slide);
+
+        // Indicadores (dots)
+        const dot = document.createElement("div");
+        dot.className = `carousel-dot ${idx === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToSlide(idx);
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    function goToSlide(index) {
+      const slides = document.querySelectorAll('.banner-slide');
+      const dots = document.querySelectorAll('.carousel-dot');
+      if (slides.length === 0) return;
+
+      slides.forEach(s => s.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+
+      currentBannerIndex = index % slides.length;
+      slides[currentBannerIndex].classList.add('active');
+      if (dots[currentBannerIndex]) dots[currentBannerIndex].classList.add('active');
+    }
+
+    function startCarouselTimer() {
+      if (bannerInterval) clearInterval(bannerInterval);
+      bannerInterval = setInterval(() => {
+        if (allBanners.length > 1) {
+          goToSlide(currentBannerIndex + 1);
+        }
+      }, 4000); // Troca a cada 4 segundos
+    }
+
+
+    /* =========================================================
+       2. BUSCAR E RENDERIZAR JOGOS
+       ========================================================= */
+    async function loadGames() {
+      const container = document.getElementById("games-grid-container");
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("jogos_online")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (error) throw error;
+
+        allGames = data || [];
+        extractTagsAndRenderFilter();
+        renderGames();
+
+      } catch (err) {
+        container.innerHTML = `<div class="empty-games aero-window">Erro ao carregar os jogos online.</div>`;
+      }
+    }
+
+    function extractTagsAndRenderFilter() {
+      const tagsBar = document.getElementById("tags-bar-container");
+      const uniqueTags = Array.from(new Set(allGames.map(g => g.tag).filter(t => t)));
+
+      tagsBar.innerHTML = `<button class="tag-btn ${currentTag === 'todas' ? 'active' : ''}" onclick="filterTag('todas')">Todos os Jogos</button>`;
+
+      uniqueTags.forEach(tag => {
+        const btn = document.createElement("button");
+        btn.className = `tag-btn ${currentTag === tag ? 'active' : ''}`;
+        btn.textContent = tag;
+        btn.onclick = (e) => filterTag(tag, e);
+        tagsBar.appendChild(btn);
+      });
+    }
+
+    function renderGames() {
+      const container = document.getElementById("games-grid-container");
+      const searchTerm = document.getElementById("game-search-input").value.toLowerCase().trim();
+
+      const filtered = allGames.filter(game => {
+        const matchesTag = currentTag === "todas" || game.tag.toLowerCase() === currentTag.toLowerCase();
+        const matchesSearch = game.nome.toLowerCase().includes(searchTerm) || game.tag.toLowerCase().includes(searchTerm);
+        return matchesTag && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-games aero-window">Nenhum jogo encontrado.</div>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      const defaultIcon = "https://cdn-icons-png.flaticon.com/512/686/686589.png";
+
+      filtered.forEach(game => {
+        const card = document.createElement("a");
+        card.className = "game-card";
+        card.href = game.link_url;
+        card.target = "_blank"; // Redireciona ao clicar
+
+        card.innerHTML = `
+          <div class="game-icon-wrapper">
+            <img src="${game.icone_url || defaultIcon}" class="game-icon-img" alt="${game.nome}" onerror="this.src='${defaultIcon}'">
+          </div>
+          <span class="game-title"></span>
+          <span class="game-tag-badge">${game.tag}</span>
+        `;
+
+        card.querySelector(".game-title").textContent = game.nome;
+        container.appendChild(card);
+      });
+    }
+
+    function filterTag(tag, evt) {
+      currentTag = tag;
+      document.querySelectorAll('.tag-btn').forEach(btn => btn.classList.remove('active'));
+      if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
+      }
+      renderGames();
+    }
+
+    function handleSearch() { renderGames(); }
+
+    function toggleSettingsModal() { document.getElementById("settings-modal").classList.toggle("active"); }
+    function setTheme(name) { document.body.className = name === 'azul' ? '' : `theme-${name}`; localStorage.setItem("dba_theme", name); }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const sessionData = localStorage.getItem("userSession");
+      if (!sessionData) { window.location.href = "index.html"; return; }
+
+      const session = JSON.parse(sessionData);
+      document.getElementById("user-display-name").textContent = session.user.nome || "Usuário";
+      document.getElementById("user-display-avatar").src = session.user.foto_perfil || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+      const savedTheme = localStorage.getItem("dba_theme");
+      if (savedTheme) setTheme(savedTheme);
+
+      loadBanners();
+      loadGames();
+    });
+  </script>
+</body>
+</html>

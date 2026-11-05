@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Ball Archive - Página Inicial</title>
+
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* =========================================================
+       VARIÁVEIS DE TEMA (Windows 7 Aero Glass Translúcido)
+       ========================================================= */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b4f8a 0%, #1e88e5 45%, #00acc1 85%, #4caf50 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(224, 242, 254, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(30, 136, 229, 0.5);
+      --glass-glow: rgba(30, 136, 229, 0.3);
+      --text-title: #06233d;
+      --text-body: #0b2e4c;
+      --accent-button: linear-gradient(180deg, rgba(82, 178, 248, 0.8) 0%, rgba(30, 136, 229, 0.8) 50%, rgba(21, 101, 192, 0.85) 51%, rgba(25, 118, 210, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Temas Coloridos Aero Vidro */
+    body.theme-vermelho {
+      --bg-gradient: linear-gradient(135deg, #7a0c0c 0%, #d32f2f 45%, #ff5722 85%, #ff9800 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 235, 238, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(211, 47, 47, 0.5);
+      --glass-glow: rgba(211, 47, 47, 0.3);
+      --text-title: #3b0505;
+      --text-body: #4a0909;
+      --accent-button: linear-gradient(180deg, rgba(255, 107, 107, 0.8) 0%, rgba(211, 47, 47, 0.8) 50%, rgba(183, 28, 28, 0.85) 51%, rgba(198, 40, 40, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-laranja {
+      --bg-gradient: linear-gradient(135deg, #7c3600 0%, #f57c00 45%, #ff9800 85%, #ffc107 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 243, 224, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(245, 124, 0, 0.5);
+      --glass-glow: rgba(245, 124, 0, 0.3);
+      --text-title: #3d1b00;
+      --text-body: #472100;
+      --accent-button: linear-gradient(180deg, rgba(255, 183, 77, 0.8) 0%, rgba(245, 124, 0, 0.8) 50%, rgba(230, 81, 0, 0.85) 51%, rgba(239, 108, 0, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-verde {
+      --bg-gradient: linear-gradient(135deg, #094e24 0%, #2e7d32 45%, #009688 85%, #8bc34a 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(232, 245, 233, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(46, 125, 50, 0.5);
+      --glass-glow: rgba(46, 125, 50, 0.3);
+      --text-title: #04240d;
+      --text-body: #0a3314;
+      --accent-button: linear-gradient(180deg, rgba(102, 187, 106, 0.8) 0%, rgba(46, 125, 50, 0.8) 50%, rgba(27, 94, 32, 0.85) 51%, rgba(37, 105, 42, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-roxo {
+      --bg-gradient: linear-gradient(135deg, #4a148c 0%, #7b1fa2 45%, #ab47bc 85%, #e91e63 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(243, 229, 245, 0.15) 100%);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-border-outer: rgba(123, 31, 162, 0.5);
+      --glass-glow: rgba(123, 31, 162, 0.3);
+      --text-title: #220042;
+      --text-body: #2d054d;
+      --accent-button: linear-gradient(180deg, rgba(171, 71, 188, 0.8) 0%, rgba(123, 31, 162, 0.8) 50%, rgba(74, 20, 140, 0.85) 51%, rgba(106, 27, 154, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-preto {
+      --bg-gradient: linear-gradient(135deg, #090d12 0%, #1a232a 50%, #2a373f 100%);
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(15, 23, 42, 0.35) 100%);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --glass-border-outer: rgba(0, 0, 0, 0.6);
+      --glass-glow: rgba(0, 0, 0, 0.5);
+      --text-title: #ffffff;
+      --text-body: #e2e8f0;
+      --accent-button: linear-gradient(180deg, rgba(71, 85, 105, 0.8) 0%, rgba(30, 41, 59, 0.85) 50%, rgba(15, 23, 42, 0.9) 51%, rgba(51, 65, 85, 0.95) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.5);
+    }
+
+    /* =========================================================
+       ESTILOS GERAIS DA PÁGINA
+       ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: 
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        var(--bg-gradient);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--text-body);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    /* JANELAS COM EFEITO VIDRO TRANSLÚCIDO (Aero Glass Pro) */
+    .aero-window {
+      position: relative;
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(190%);
+      -webkit-backdrop-filter: blur(22px) saturate(190%);
+      border-radius: 18px;
+      border: 1.5px solid var(--glass-border);
+      outline: 1px solid var(--glass-border-outer);
+      box-shadow: 
+        0 20px 45px var(--glass-glow),
+        0 8px 16px rgba(0, 0, 0, 0.15),
+        inset 0 2px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+    }
+
+    .aero-window::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+      border-radius: 16px 16px 0 0;
+    }
+
+    /* Header Superior */
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 25px;
+      margin-bottom: 15px;
+    }
+
+    .header-spacer {
+      width: 210px;
+    }
+
+    .header-title {
+      text-align: center;
+      flex: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-title h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-title);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.5px;
+      transition: color 0.3s ease;
+    }
+
+    /* Widget do perfil translúcido no canto superior direito */
+    .user-profile {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 12px 5px 16px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.9),
+        0 4px 10px rgba(0, 0, 0, 0.12);
+      min-width: 210px;
+      justify-content: flex-end;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      background-color: #cbd5e1;
+    }
+
+    .user-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-title);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 95px;
+    }
+
+    /* Botão de Sair / Logout */
+    .btn-logout {
+      background: linear-gradient(180deg, #ff6b6b 0%, #d32f2f 100%);
+      color: #ffffff;
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
+      padding: 5px 11px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.6),
+        0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-logout:hover {
+      background: linear-gradient(180deg, #ff5252 0%, #b71c1c 100%);
+      transform: scale(1.05);
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.8),
+        0 4px 10px rgba(211, 47, 47, 0.4);
+    }
+
+    /* =========================================================
+       BARRA DE NAVEGAÇÃO SUPERIOR COM ÍCONES (Abaixo do Título)
+       ========================================================= */
+    .top-subnav {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 25px;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .subnav-link {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-title);
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .subnav-link:hover {
+      background: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 5px 12px var(--glass-glow);
+    }
+
+    .subnav-icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Container Principal com Layout em 2 Colunas */
+    main {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      gap: 25px;
+      align-items: flex-start;
+    }
+
+    /* COLUNA DA ESQUERDA */
+    .left-column {
+      width: 310px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* BLOCO DE ATUALIZAÇÕES */
+    .updates-sidebar {
+      width: 100%;
+      padding: 22px;
+    }
+
+    .updates-title {
+      position: relative;
+      z-index: 2;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-title);
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .updates-list {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .update-item {
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(0, 0, 0, 0.06);
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text-body);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+      word-wrap: break-word;
+    }
+
+    .update-item .update-date {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-title);
+      opacity: 0.75;
+      margin-top: 6px;
+      display: block;
+    }
+
+    .updates-empty {
+      position: relative;
+      z-index: 2;
+      font-size: 13px;
+      color: var(--text-body);
+      opacity: 0.8;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    /* JANELA DO MURAL DA COMUNIDADE */
+    .mural-card {
+      width: 100%;
+      padding: 18px;
+      text-decoration: none;
+      color: var(--text-body);
+      display: block;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .mural-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px var(--glass-glow), inset 0 2px 2px rgba(255, 255, 255, 1);
+    }
+
+    .mural-header {
+      position: relative;
+      z-index: 2;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-title);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .mural-text {
+      position: relative;
+      z-index: 2;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-body);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Coluna de Conteúdo Principal (Direita) */
+    .main-content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    /* BLOCO DE NAVEGAÇÃO / ROUTER EM FORMATO DE LISTA */
+    .navigation-block {
+      width: 100%;
+      padding: 25px;
+    }
+
+    .navigation-title {
+      position: relative;
+      z-index: 2;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-title);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-list {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-body);
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.65);
+      transform: translateX(6px);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 14px var(--glass-glow);
+      color: var(--text-title);
+    }
+
+    .nav-item .arrow {
+      font-size: 16px;
+      opacity: 0.7;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .nav-item:hover .arrow {
+      transform: translateX(4px);
+      opacity: 1;
+    }
+
+    /* CARD DE DESCRIÇÃO (FICA NO FINAL DA PÁGINA) */
+    .description-card {
+      width: 100%;
+      padding: 25px 30px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .description-card p {
+      position: relative;
+      z-index: 2;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-body);
+      margin-bottom: 14px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .description-card .copyright {
+      position: relative;
+      z-index: 2;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-title);
+      opacity: 0.9;
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      padding-top: 12px;
+      margin-top: 8px;
+    }
+
+    .content-area {
+      width: 100%;
+    }
+
+    /* =========================================================
+       BOTÃO DE ENGRENAGEM DE CONFIGURAÇÕES
+       ========================================================= */
+    .settings-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--accent-button);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--accent-button-border);
+      color: #ffffff;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .settings-btn:hover {
+      transform: rotate(45deg) scale(1.08);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 10px 25px var(--glass-glow);
+    }
+
+    /* PAINEL MODAL DE CONFIGURAÇÕES TRANSLÚCIDO */
+    .settings-modal {
+      position: fixed;
+      bottom: 90px;
+      right: 25px;
+      width: 340px;
+      padding: 22px;
+      display: none;
+      z-index: 1001;
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .settings-modal.active {
+      display: block;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(15px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .settings-header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .settings-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .close-settings {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-title);
+      font-weight: bold;
+    }
+
+    .setting-group {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 18px;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 8px;
+    }
+
+    .color-options {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 32px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.15);
+    }
+
+    .swatch-azul { background: linear-gradient(135deg, #0b4f8a, #1e88e5); }
+    .swatch-vermelho { background: linear-gradient(135deg, #7a0c0c, #d32f2f); }
+    .swatch-laranja { background: linear-gradient(135deg, #7c3600, #f57c00); }
+    .swatch-verde { background: linear-gradient(135deg, #094e24, #2e7d32); }
+    .swatch-roxo { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+    .swatch-preto { background: linear-gradient(135deg, #121212, #37474f); }
+
+    .wallpaper-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      max-height: 140px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .wallpaper-thumb {
+      width: 100%;
+      height: 42px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(0, 0, 0, 0.15);
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 1px 2px #000;
+      transition: transform 0.2s;
+    }
+
+    .wallpaper-thumb:hover {
+      transform: scale(1.08);
+    }
+
+    .reset-bg-btn {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--accent-button);
+      border: 1px solid var(--accent-button-border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        flex-direction: column;
+      }
+
+      .left-column {
+        width: 100%;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .header-spacer {
+        display: none;
+      }
+
+      .user-profile {
+        justify-content: center;
+      }
+
+      .top-subnav {
+        justify-content: center;
+      }
+
+      .settings-modal {
+        right: 15px;
+        left: 15px;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CABEÇALHO COM VIDRO TRANSLÚCIDO -->
+  <header class="aero-window">
+    <div class="header-spacer"></div>
+    
+    <div class="header-title">
+      <h1>Dragon Ball Archive</h1>
+    </div>
+
+    <div class="user-profile">
+      <span class="user-name" id="user-display-name">Carregando...</span>
+      <img src="" alt="Foto de Perfil" id="user-display-avatar" class="user-avatar">
+      <button class="btn-logout" onclick="logout()" title="Sair e voltar para o login">Sair 🚪</button>
+    </div>
+  </header>
+
+  <!-- BARRA SUB-MENU COM NOMES E ÍCONES URL -->
+  <nav class="top-subnav aero-window">
+    <a href="budokai_tenkaishi3.html" class="subnav-link">
+      <img src="https://cdn-icons-png.flaticon.com/512/528/528101.png" alt="Budokai" class="subnav-icon">
+      <span>Budokai Tenkaichi 3</span>
+    </a>
+    <a href="wiki.html" class="subnav-link">
+      <img src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png" alt="Wikis" class="subnav-icon">
+      <span>Wikis</span>
+    </a>
+    <a href="acervo_imagens.html" class="subnav-link">
+      <img src="https://cdn-icons-png.flaticon.com/512/1375/1375106.png" alt="Acervo" class="subnav-icon">
+      <span>Acervo de imagens</span>
+    </a>
+    <a href="museu.html" class="subnav-link">
+      <img src="https://cdn-icons-png.flaticon.com/512/2972/2972124.png" alt="Museu" class="subnav-icon">
+      <span>Museu</span>
+    </a>
+    <a href="jogo.html" class="subnav-link">
+      <img src="https://cdn-icons-png.flaticon.com/512/686/686589.png" alt="Jogos" class="subnav-icon">
+      <span>Jogos online</span>
+    </a>
+  </nav>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main>
+    <!-- COLUNA DA ESQUERDA -->
+    <div class="left-column">
+      <!-- BLOCO DE ATUALIZAÇÕES -->
+      <aside class="updates-sidebar aero-window">
+        <h2 class="updates-title">📢 Atualizações</h2>
+        <div class="updates-list" id="updates-list">
+          <div class="updates-empty">Carregando atualizações...</div>
+        </div>
+      </aside>
+
+      <!-- JANELA DO MURAL DA COMUNIDADE (CLICÁVEL) -->
+      <a href="mural_da_comunidade.html" class="mural-card aero-window">
+        <div class="mural-header">💬 Mural da Comunidade</div>
+        <div class="mural-text">
+          Clique aqui para deixar seus recados para todos outros usuarios, mural da comunidade
+        </div>
+      </a>
+    </div>
+
+    <!-- ÁREA PRINCIPAL (DIREITA) -->
+    <div class="main-content-wrapper">
+
+      <!-- BLOCO DE NAVEGAÇÃO / ROUTER EM FORMATO DE LISTA -->
+      <section class="content-area" id="main-content">
+        <div class="navigation-block aero-window">
+          <h2 class="navigation-title">📂 Navegação do Acervo</h2>
+          <div class="nav-list">
+            <a href="#" class="nav-item">
+              <span>🐉 Router / Página 1 (Please Router)</span>
+              <span class="arrow">➔</span>
+            </a>
+            <a href="#" class="nav-item">
+              <span>📚 Router / Página 2 (Please Router)</span>
+              <span class="arrow">➔</span>
+            </a>
+            <a href="#" class="nav-item">
+              <span>🎬 Router / Página 3 (Please Router)</span>
+              <span class="arrow">➔</span>
+            </a>
+            <a href="#" class="nav-item">
+              <span>🎮 Router / Página 4 (Please Router)</span>
+              <span class="arrow">➔</span>
+            </a>
+            <a href="#" class="nav-item">
+              <span>✨ Router / Página 5 (Please Router)</span>
+              <span class="arrow">➔</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD DE DESCRIÇÃO (NO FINAL DA PÁGINA) -->
+      <section class="description-card aero-window">
+        <p>
+          Um site criado para apenas preservar o conteúdo diverso de Dragon Ball, tanto original tanto pela comunidade. 
+          O site Dragon Ball Archive não possui nenhuma intenção de gerar lucro em cima da marca Dragon Ball.
+        </p>
+        <p class="copyright">
+          Todos os direitos reservados a ©Bird Studio/Shueisha, Toei Animation.
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- BOTÃO DE ENGRENAGEM (CANTO INFERIOR DIREITO) -->
+  <button class="settings-btn" onclick="toggleSettingsModal()" aria-label="Configurações">
+    ⚙️
+  </button>
+
+  <!-- PAINEL MODAL DE CONFIGURAÇÕES TRANSLÚCIDO -->
+  <div class="settings-modal aero-window" id="settings-modal">
+    <div class="settings-header">
+      <h2>Configurações do Site</h2>
+      <button class="close-settings" onclick="toggleSettingsModal()">✕</button>
+    </div>
+
+    <div class="setting-group">
+      <label>Cor do Tema (Bordas e Vidro):</label>
+      <div class="color-options">
+        <div class="color-swatch swatch-azul" onclick="setTheme('azul')" title="Azul (Padrão)"></div>
+        <div class="color-swatch swatch-vermelho" onclick="setTheme('vermelho')" title="Vermelho"></div>
+        <div class="color-swatch swatch-laranja" onclick="setTheme('laranja')" title="Laranja"></div>
+        <div class="color-swatch swatch-verde" onclick="setTheme('verde')" title="Verde"></div>
+        <div class="color-swatch swatch-roxo" onclick="setTheme('roxo')" title="Roxo"></div>
+        <div class="color-swatch swatch-preto" onclick="setTheme('preto')" title="Preto (Escuro)"></div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <label>Plano de Fundo (Wallpapers):</label>
+      <div class="wallpaper-grid" id="wallpaper-grid">
+        <!-- Gerado via JavaScript -->
+      </div>
+      <button class="reset-bg-btn" onclick="setWallpaper('')">Restaurar Gradiente Original</button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       CONFIGURAÇÕES DO SUPABASE
+       ========================================================= */
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* =========================================================
+       ARRAY DE WALLPAPERS
+       ========================================================= */
+    const WALLPAPERS = [
+      "https://i.pinimg.com/1200x/ba/1f/b4/ba1fb434b1aad928b1c1c5d027a9b03b.jpg", // Wallpaper 1
+      "", "", "", "", "", "", "", "", ""
+    ];
+
+    /* =========================================================
+       FUNÇÃO DE LOGOUT / ENCERRAMENTO DE SESSÃO
+       ========================================================= */
+    function logout() {
+      localStorage.removeItem("userSession");
+      window.location.href = "index.html";
+    }
+
+    /* =========================================================
+       FUNÇÃO PARA BUSCAR ATUALIZAÇÕES DO SUPABASE
+       ========================================================= */
+    async function loadUpdates() {
+      const updatesContainer = document.getElementById("updates-list");
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("atualizacoes")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (error) {
+          console.error("Erro ao buscar atualizações:", error);
+          updatesContainer.innerHTML = `<div class="updates-empty">Nenhuma atualização cadastrada ainda.</div>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          updatesContainer.innerHTML = `<div class="updates-empty">Nenhuma atualização no momento.</div>`;
+          return;
+        }
+
+        updatesContainer.innerHTML = "";
+        data.forEach(item => {
+          const updateElement = document.createElement("div");
+          updateElement.className = "update-item";
+
+          let dateFormatted = "";
+          if (item.created_at) {
+            const dateObj = new Date(item.created_at);
+            dateFormatted = `<span class="update-date">📅 ${dateObj.toLocaleDateString('pt-BR')}</span>`;
+          }
+
+          updateElement.innerHTML = `
+            <div>${item.texto || item.conteudo || "Atualização sem texto"}</div>
+            ${dateFormatted}
+          `;
+
+          updatesContainer.appendChild(updateElement);
+        });
+
+      } catch (err) {
+        console.error("Erro inesperado:", err);
+        updatesContainer.innerHTML = `<div class="updates-empty">Falha ao carregar atualizações.</div>`;
+      }
+    }
+
+    /* =========================================================
+       FUNÇÕES DE CONFIGURAÇÃO E PERSISTÊNCIA
+       ========================================================= */
+    function toggleSettingsModal() {
+      const modal = document.getElementById("settings-modal");
+      modal.classList.toggle("active");
+    }
+
+    function setTheme(colorName) {
+      document.body.className = colorName === 'azul' ? '' : `theme-${colorName}`;
+      localStorage.setItem("dba_theme", colorName);
+    }
+
+    function setWallpaper(url) {
+      if (url) {
+        document.body.style.backgroundImage = `url('${url}')`;
+        localStorage.setItem("dba_wallpaper", url);
+      } else {
+        document.body.style.backgroundImage = "";
+        localStorage.removeItem("dba_wallpaper");
+      }
+    }
+
+    function renderWallpaperGrid() {
+      const grid = document.getElementById("wallpaper-grid");
+      grid.innerHTML = "";
+
+      WALLPAPERS.forEach((url, index) => {
+        const thumb = document.createElement("div");
+        thumb.className = "wallpaper-thumb";
+        thumb.textContent = `#${index + 1}`;
+        
+        if (url) {
+          thumb.style.backgroundImage = `url('${url}')`;
+        }
+
+        thumb.onclick = () => {
+          if (url) {
+            setWallpaper(url);
+          } else {
+            alert(`Insira a URL do Wallpaper #${index + 1} no array WALLPAPERS no código JavaScript.`);
+          }
+        };
+
+        grid.appendChild(thumb);
+      });
+    }
+
+    /* =========================================================
+       INICIALIZAÇÃO DA PÁGINA
+       ========================================================= */
+    document.addEventListener("DOMContentLoaded", function() {
+      const sessionData = localStorage.getItem("userSession");
+
+      if (!sessionData) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const session = JSON.parse(sessionData);
+      const user = session.user;
+
+      const nameElement = document.getElementById("user-display-name");
+      const avatarElement = document.getElementById("user-display-avatar");
+
+      nameElement.textContent = user.nome || "Usuário";
+
+      const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%231e88e5'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.67 3.37-2.58 5.05-2.58 1.67 0 5.02.91 5.05 2.58C15.8 19.15 14.03 20 12 20z'/></svg>";
+      avatarElement.src = user.foto_perfil || defaultAvatar;
+
+      const savedTheme = localStorage.getItem("dba_theme");
+      if (savedTheme) setTheme(savedTheme);
+
+      const savedWallpaper = localStorage.getItem("dba_wallpaper");
+      if (savedWallpaper) setWallpaper(savedWallpaper);
+
+      renderWallpaperGrid();
+      loadUpdates();
+    });
+  </script>
+
+</body>
+</html>

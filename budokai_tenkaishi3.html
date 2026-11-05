@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Ball Archive - Acervo Budokai Tenkaichi 3</title>
+
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* =========================================================
+       TEMA WINDOWS XP LUNA BLUE (ESTILO PASTA / REPOSITÓRIO)
+       ========================================================= */
+    :root {
+      --xp-bg: #3a6ea5;
+      --xp-window-bg: #ece9d8;
+      --xp-titlebar-from: #0058ee;
+      --xp-titlebar-to: #3896ff;
+      --xp-border: #0046d5;
+      --xp-tab-active: #ffffff;
+      --xp-tab-inactive: #e0ded0;
+      --xp-text: #000000;
+      --xp-button-bg: linear-gradient(180deg, #ffffff 0%, #ece9d8 45%, #d8d2bd 100%);
+      --xp-button-border: #003c74;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tahoma', 'Segoe UI', Geneva, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--xp-bg);
+      background-image: radial-gradient(circle at 50% 30%, #4a82c4 0%, #2b5585 100%);
+      color: var(--xp-text);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .btn-xp {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #000;
+      background: var(--xp-button-bg);
+      border: 1px solid var(--xp-button-border);
+      border-radius: 3px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: inset 1px 1px 0px #fff, 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .btn-xp:hover {
+      background: linear-gradient(180deg, #fff7d0 0%, #fbe694 100%);
+      border-color: #e59700;
+    }
+
+    .user-info-xp {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid var(--xp-border);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .user-info-xp img {
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      object-fit: cover;
+    }
+
+    /* JANELA PRINCIPAL ESTILO PASTA WINDOWS XP */
+    .xp-window {
+      width: 100%;
+      max-width: 1100px;
+      background-color: var(--xp-window-bg);
+      border: 3px solid var(--xp-border);
+      border-radius: 8px 8px 0 0;
+      box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .xp-titlebar {
+      background: linear-gradient(180deg, var(--xp-titlebar-to) 0%, var(--xp-titlebar-from) 100%);
+      padding: 6px 10px;
+      border-radius: 5px 5px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 13px;
+      text-shadow: 1px 1px 1px #000;
+    }
+
+    .xp-titlebar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .xp-folder-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .xp-window-controls {
+      display: flex;
+      gap: 3px;
+    }
+
+    .xp-control-btn {
+      width: 21px;
+      height: 21px;
+      border-radius: 3px;
+      border: 1px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+      cursor: default;
+    }
+
+    .btn-minimize { background: linear-gradient(180deg, #3c8dfc, #0044b7); }
+    .btn-maximize { background: linear-gradient(180deg, #3c8dfc, #0044b7); }
+    .btn-close { background: linear-gradient(180deg, #e76c53, #c42608); }
+
+    /* NAVEGAÇÃO DE SETORES (ABAS) */
+    .xp-tabs-bar {
+      background: #d8d2bd;
+      padding: 8px 10px 0 10px;
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid #ffffff;
+      flex-wrap: wrap;
+    }
+
+    .xp-tab-btn {
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #000000;
+      background: var(--xp-tab-inactive);
+      border: 1px solid #999;
+      border-bottom: none;
+      border-radius: 5px 5px 0 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .xp-tab-btn:hover { background: #f4f2e8; }
+
+    .xp-tab-btn.active {
+      background: var(--xp-tab-active);
+      border-color: #0046d5;
+      border-bottom: 2px solid #ffffff;
+      margin-bottom: -2px;
+      z-index: 2;
+    }
+
+    .xp-window-body {
+      background-color: #ffffff;
+      border: 2px solid #7f9db9;
+      margin: 12px;
+      padding: 20px;
+      min-height: 480px;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .sector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #d0d0d0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .sector-header h2 {
+      font-size: 16px;
+      color: #003399;
+    }
+
+    /* FILTROS DE CATEGORIAS DE MODS */
+    .category-filter-bar {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .cat-badge-btn {
+      font-size: 11px;
+      padding: 3px 8px;
+      border: 1px solid #7f9db9;
+      background: #f0f0f0;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .cat-badge-btn:hover, .cat-badge-btn.active {
+      background: #0058ee;
+      color: #fff;
+      border-color: #003c74;
+    }
+
+    /* GRIDS DE ITENS */
+    .repo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+      margin-top: 15px;
+    }
+
+    .repo-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #fdfdfd;
+      cursor: pointer;
+      text-decoration: none;
+      color: #000;
+      transition: all 0.2s;
+    }
+
+    .repo-card:hover {
+      background-color: #e0eeff;
+      border-color: #0058ee;
+      box-shadow: 0 2px 8px rgba(0, 88, 238, 0.2);
+    }
+
+    .repo-card img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      margin-bottom: 8px;
+      background: #fff;
+    }
+
+    .repo-card-title {
+      font-size: 12px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .repo-card-cat {
+      font-size: 10px;
+      background: #e2e8f0;
+      color: #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      font-weight: bold;
+    }
+
+    /* LISTA ESTILO LINHA PARA VOZ */
+    .list-voice-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .voice-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #f4f6f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      text-decoration: none;
+      color: #003399;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .voice-item:hover {
+      background: #e0eeff;
+      border-color: #0058ee;
+    }
+
+    /* MODAL DE VISUALIZAÇÃO DE MOD (ESTILO JANELA DO XP) */
+    .xp-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .xp-modal-overlay.active { display: flex; }
+
+    .xp-modal-window {
+      width: 90%;
+      max-width: 600px;
+      background: #ece9d8;
+      border: 3px solid #0046d5;
+      border-radius: 6px 6px 0 0;
+      box-shadow: 6px 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .xp-modal-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      background: #fff;
+      margin: 8px;
+      border: 1px solid #7f9db9;
+    }
+
+    .xp-modal-img {
+      max-width: 100%;
+      max-height: 350px;
+      object-fit: contain;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .xp-modal-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #003399;
+      text-align: center;
+    }
+
+    .xp-modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .btn-download-mod {
+      padding: 10px 20px;
+      background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      border: 1px solid #1b5e20;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+
+    .btn-download-mod:hover {
+      background: linear-gradient(180deg, #66bb6a 0%, #388e3c 100%);
+    }
+
+    .xp-statusbar {
+      background: #ece9d8;
+      border-top: 1px solid #aca899;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #444;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="pagina_inicial.html" class="btn-xp">
+      ◀ Voltar para Página Inicial
+    </a>
+
+    <div class="user-info-xp">
+      <img src="" id="xp-user-avatar" alt="Avatar">
+      <span id="xp-user-name">Usuário</span>
+    </div>
+  </header>
+
+  <!-- JANELA PRINCIPAL DO REPOSITÓRIO BT3 -->
+  <div class="xp-window">
+
+    <div class="xp-titlebar">
+      <div class="xp-titlebar-left">
+        <img src="https://cdn-icons-png.flaticon.com/512/716/715004.png" class="xp-folder-icon" alt="Pasta">
+        <span>Acervo Dragon Ball Z: Budokai Tenkaichi 3 - Repositório de Mods</span>
+      </div>
+      <div class="xp-window-controls">
+        <div class="xp-control-btn btn-minimize">_</div>
+        <div class="xp-control-btn btn-maximize">□</div>
+        <div class="xp-control-btn btn-close">✕</div>
+      </div>
+    </div>
+
+    <!-- ABAS DE SETORES -->
+    <nav class="xp-tabs-bar">
+      <button class="xp-tab-btn active" onclick="switchTab('inicio')">📁 Início</button>
+      <button class="xp-tab-btn" onclick="switchTab('ferramentas')">🛠️ Ferramentas</button>
+      <button class="xp-tab-btn" onclick="switchTab('mods')">🎮 Mods</button>
+      <button class="xp-tab-btn" onclick="switchTab('iso')">💿 ISO</button>
+      <button class="xp-tab-btn" onclick="switchTab('renders')">🖼️ Renders</button>
+      <button class="xp-tab-btn" onclick="switchTab('voz')">🎙️ Voz</button>
+    </nav>
+
+    <div class="xp-window-body">
+
+      <!-- SETOR: INÍCIO -->
+      <section id="sec-inicio" class="tab-content active">
+        <div class="sector-header">
+          <h2>📂 Introdução ao Acervo</h2>
+        </div>
+        <p style="font-size: 14px; color: #222;">text</p>
+      </section>
+
+      <!-- SETOR: FERRAMENTAS -->
+      <section id="sec-ferramentas" class="tab-content">
+        <div class="sector-header">
+          <h2>🛠️ Ferramentas de Edição & Modding</h2>
+        </div>
+        <div class="repo-grid" id="grid-ferramentas">
+          <div style="font-size: 12px; color: #666;">Carregando ferramentas...</div>
+        </div>
+      </section>
+
+      <!-- SETOR: MODS -->
+      <section id="sec-mods" class="tab-content">
+        <div class="sector-header">
+          <h2>🎮 Mods de Personagens e Arenas</h2>
+          <div class="category-filter-bar" id="cat-filter-bar">
+            <button class="cat-badge-btn active" onclick="filterMods('todos')">Todos</button>
+            <button class="cat-badge-btn" onclick="filterMods('Clássico')">Clássico</button>
+            <button class="cat-badge-btn" onclick="filterMods('Z')">Z</button>
+            <button class="cat-badge-btn" onclick="filterMods('GT')">GT</button>
+            <button class="cat-badge-btn" onclick="filterMods('Heroes')">Heroes</button>
+            <button class="cat-badge-btn" onclick="filterMods('Super')">Super</button>
+            <button class="cat-badge-btn" onclick="filterMods('What if')">What if</button>
+            <button class="cat-badge-btn" onclick="filterMods('extra')">Extra</button>
+            <button class="cat-badge-btn" onclick="filterMods('AF')">AF</button>
+            <button class="cat-badge-btn" onclick="filterMods('outro')">Outro</button>
+          </div>
+        </div>
+        <div class="repo-grid" id="grid-mods">
+          <div style="font-size: 12px; color: #666;">Carregando mods...</div>
+        </div>
+      </section>
+
+      <!-- SETOR: ISO -->
+      <section id="sec-iso" class="tab-content">
+        <div class="sector-header">
+          <h2>💿 ISOs e Versões Customizadas</h2>
+        </div>
+        <div class="repo-grid" id="grid-iso">
+          <div style="font-size: 12px; color: #666;">Carregando ISOs...</div>
+        </div>
+      </section>
+
+      <!-- SETOR: RENDERS -->
+      <section id="sec-renders" class="tab-content">
+        <div class="sector-header">
+          <h2>🖼️ Renders e Imagens</h2>
+        </div>
+        <div class="repo-grid" id="grid-renders">
+          <div style="font-size: 12px; color: #666;">Carregando renders...</div>
+        </div>
+      </section>
+
+      <!-- SETOR: VOZ -->
+      <section id="sec-voz" class="tab-content">
+        <div class="sector-header">
+          <h2>🎙️ Áudios e Dublagens</h2>
+        </div>
+        <div class="list-voice-container" id="grid-voz">
+          <div style="font-size: 12px; color: #666;">Carregando dublagens...</div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="xp-statusbar">
+      <span id="xp-status-count">Pronto</span>
+      <span>Dragon Ball Archive Repo</span>
+    </div>
+
+  </div>
+
+  <!-- MODAL PARA EXIBIÇÃO DE DETALHES E DOWNLOAD DO MOD -->
+  <div class="xp-modal-overlay" id="mod-modal">
+    <div class="xp-modal-window">
+      <div class="xp-titlebar">
+        <div class="xp-titlebar-left">
+          <span>🎮 Detalhes do Mod</span>
+        </div>
+        <div class="xp-window-controls">
+          <div class="xp-control-btn btn-close" onclick="closeModModal()" style="cursor: pointer;">✕</div>
+        </div>
+      </div>
+      <div class="xp-modal-body">
+        <h3 class="xp-modal-title" id="modal-mod-title">Nome do Mod</h3>
+        <span class="repo-card-cat" id="modal-mod-cat">Categoria</span>
+        <img src="" id="modal-mod-img" class="xp-modal-img" alt="Foto Ampliada do Mod">
+        
+        <div class="xp-modal-actions">
+          <a href="#" target="_blank" id="modal-mod-download-btn" class="btn-download-mod">
+            ⬇️ Clicar para baixar o mod
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allModsList = [];
+
+    function switchTab(sectorName) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.xp-tab-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById(`sec-${sectorName}`);
+      if (target) target.classList.add('active');
+      
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+    }
+
+    /* BUSCA E RENDERIZAÇÃO DE ITENS DO SUPABASE */
+    async function loadBT3Items() {
+      try {
+        const { data, error } = await supabaseClient
+          .from("bt3_acervo")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (error) throw error;
+
+        // Limpar containers
+        const gFerramentas = document.getElementById("grid-ferramentas");
+        const gMods = document.getElementById("grid-mods");
+        const gIso = document.getElementById("grid-iso");
+        const gRenders = document.getElementById("grid-renders");
+        const gVoz = document.getElementById("grid-voz");
+
+        gFerramentas.innerHTML = "";
+        gMods.innerHTML = "";
+        gIso.innerHTML = "";
+        gRenders.innerHTML = "";
+        gVoz.innerHTML = "";
+
+        allModsList = [];
+
+        if (!data || data.length === 0) {
+          const emptyText = `<div style="font-size: 12px; color: #888;">Nenhum item cadastrado nesta seção.</div>`;
+          gFerramentas.innerHTML = emptyText;
+          gMods.innerHTML = emptyText;
+          gIso.innerHTML = emptyText;
+          gRenders.innerHTML = emptyText;
+          gVoz.innerHTML = emptyText;
+          return;
+        }
+
+        data.forEach(item => {
+          const fallbackImg = "https://cdn-icons-png.flaticon.com/512/716/715004.png";
+
+          // 1. FERRAMENTAS: Foto + Nome -> Clica e Redireciona
+          if (item.tipo === "ferramenta") {
+            const card = document.createElement("a");
+            card.className = "repo-card";
+            card.href = item.link_url;
+            card.target = "_blank";
+            card.innerHTML = `
+              <img src="${item.imagem_url || fallbackImg}" alt="${item.titulo}">
+              <span class="repo-card-title"></span>
+            `;
+            card.querySelector(".repo-card-title").textContent = item.titulo;
+            gFerramentas.appendChild(card);
+          }
+
+          // 2. MODS: Nome + Foto + Categoria -> Clica e abre Modal com Foto Grande + Botão
+          else if (item.tipo === "mod") {
+            allModsList.push(item);
+          }
+
+          // 3. ISO: Capa + Nome -> Clica e Redireciona
+          else if (item.tipo === "iso") {
+            const card = document.createElement("a");
+            card.className = "repo-card";
+            card.href = item.link_url;
+            card.target = "_blank";
+            card.innerHTML = `
+              <img src="${item.imagem_url || fallbackImg}" alt="${item.titulo}">
+              <span class="repo-card-title"></span>
+            `;
+            card.querySelector(".repo-card-title").textContent = item.titulo;
+            gIso.appendChild(card);
+          }
+
+          // 4. RENDERS: Nome + Imagem -> Clica e Redireciona
+          else if (item.tipo === "render") {
+            const card = document.createElement("a");
+            card.className = "repo-card";
+            card.href = item.link_url;
+            card.target = "_blank";
+            card.innerHTML = `
+              <img src="${item.imagem_url || fallbackImg}" alt="${item.titulo}">
+              <span class="repo-card-title"></span>
+            `;
+            card.querySelector(".repo-card-title").textContent = item.titulo;
+            gRenders.appendChild(card);
+          }
+
+          // 5. VOZ: Nome -> Clica e Redireciona
+          else if (item.tipo === "voz") {
+            const itemVoice = document.createElement("a");
+            itemVoice.className = "voice-item";
+            itemVoice.href = item.link_url;
+            itemVoice.target = "_blank";
+            itemVoice.innerHTML = `
+              <span>🎙️ <span class="v-title"></span></span>
+              <span>Acessar ➔</span>
+            `;
+            itemVoice.querySelector(".v-title").textContent = item.titulo;
+            gVoz.appendChild(itemVoice);
+          }
+        });
+
+        // Renderiza a lista de mods
+        renderModsGrid(allModsList);
+
+      } catch (err) {
+        console.error("Erro ao carregar acervo BT3:", err);
+      }
+    }
+
+    // RENDERIZAR GRID DE MODS
+    function renderModsGrid(mods) {
+      const gMods = document.getElementById("grid-mods");
+      gMods.innerHTML = "";
+
+      if (mods.length === 0) {
+        gMods.innerHTML = `<div style="font-size: 12px; color: #888;">Nenhum mod encontrado para esta categoria.</div>`;
+        return;
+      }
+
+      mods.forEach(mod => {
+        const fallbackImg = "https://cdn-icons-png.flaticon.com/512/2885/2885502.png";
+        const card = document.createElement("div");
+        card.className = "repo-card";
+        card.onclick = () => openModModal(mod);
+
+        card.innerHTML = `
+          <img src="${mod.imagem_url || fallbackImg}" alt="${mod.titulo}">
+          <span class="repo-card-title"></span>
+          <span class="repo-card-cat">${mod.categoria || 'Geral'}</span>
+        `;
+        card.querySelector(".repo-card-title").textContent = mod.titulo;
+        gMods.appendChild(card);
+      });
+    }
+
+    // FILTRO DE CATEGORIAS DE MODS
+    function filterMods(cat) {
+      document.querySelectorAll('.cat-badge-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      if (cat === 'todos') {
+        renderModsGrid(allModsList);
+      } else {
+        const filtered = allModsList.filter(m => m.categoria === cat);
+        renderModsGrid(filtered);
+      }
+    }
+
+    // ABRIR E FECHAR MODAL DO MOD
+    function openModModal(mod) {
+      document.getElementById("modal-mod-title").textContent = mod.titulo;
+      document.getElementById("modal-mod-cat").textContent = mod.categoria || 'Geral';
+      document.getElementById("modal-mod-img").src = mod.imagem_url || "https://cdn-icons-png.flaticon.com/512/2885/2885502.png";
+      document.getElementById("modal-mod-download-btn").href = mod.link_url;
+
+      document.getElementById("mod-modal").classList.add("active");
+    }
+
+    function closeModModal() {
+      document.getElementById("mod-modal").classList.remove("active");
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const sessionData = localStorage.getItem("userSession");
+
+      if (!sessionData) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const session = JSON.parse(sessionData);
+      const user = session.user;
+
+      document.getElementById("xp-user-name").textContent = user.nome || "Usuário";
+
+      const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%230058ee'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.67 3.37-2.58 5.05-2.58 1.67 0 5.02.91 5.05 2.58C15.8 19.15 14.03 20 12 20z'/></svg>";
+      document.getElementById("xp-user-avatar").src = user.foto_perfil || defaultAvatar;
+
+      loadBT3Items();
+    });
+  </script>
+
+</body>
+</html>

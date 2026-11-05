@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dragon Ball Archive - Mural da Comunidade</title>
+
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* =========================================================
+       VARIÁVEIS DE TEMA (Windows 7 Aero + Estilo Chan Retro Claro)
+       ========================================================= */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b4f8a 0%, #1e88e5 45%, #00acc1 85%, #4caf50 100%);
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-border-outer: rgba(30, 136, 229, 0.5);
+      --glass-glow: rgba(30, 136, 229, 0.3);
+      --text-title: #06233d;
+      --text-body: #112233;
+      
+      /* Cores do Chan Retro (Estilo Futaba / Board Claro) */
+      --chan-post-bg: #f0e0d6;
+      --chan-post-border: #d9bfb7;
+      --chan-header-bg: #ea8f8f;
+      --chan-author: #117743;
+      --accent-button: linear-gradient(180deg, rgba(82, 178, 248, 0.9) 0%, rgba(30, 136, 229, 0.9) 50%, rgba(21, 101, 192, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-vermelho {
+      --bg-gradient: linear-gradient(135deg, #7a0c0c 0%, #d32f2f 45%, #ff5722 85%, #ff9800 100%);
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-border-outer: rgba(211, 47, 47, 0.5);
+      --glass-glow: rgba(211, 47, 47, 0.3);
+      --text-title: #3b0505;
+      --text-body: #331111;
+      --accent-button: linear-gradient(180deg, rgba(255, 107, 107, 0.9) 0%, rgba(211, 47, 47, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-laranja {
+      --bg-gradient: linear-gradient(135deg, #7c3600 0%, #f57c00 45%, #ff9800 85%, #ffc107 100%);
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-border-outer: rgba(245, 124, 0, 0.5);
+      --glass-glow: rgba(245, 124, 0, 0.3);
+      --text-title: #3d1b00;
+      --text-body: #331f11;
+      --accent-button: linear-gradient(180deg, rgba(255, 183, 77, 0.9) 0%, rgba(245, 124, 0, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-verde {
+      --bg-gradient: linear-gradient(135deg, #094e24 0%, #2e7d32 45%, #009688 85%, #8bc34a 100%);
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-border-outer: rgba(46, 125, 50, 0.5);
+      --glass-glow: rgba(46, 125, 50, 0.3);
+      --text-title: #04240d;
+      --text-body: #11331a;
+      --accent-button: linear-gradient(180deg, rgba(102, 187, 106, 0.9) 0%, rgba(46, 125, 50, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-roxo {
+      --bg-gradient: linear-gradient(135deg, #4a148c 0%, #7b1fa2 45%, #ab47bc 85%, #e91e63 100%);
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-border-outer: rgba(123, 31, 162, 0.5);
+      --glass-glow: rgba(123, 31, 162, 0.3);
+      --text-title: #220042;
+      --text-body: #231133;
+      --accent-button: linear-gradient(180deg, rgba(171, 71, 188, 0.9) 0%, rgba(123, 31, 162, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.8);
+    }
+
+    body.theme-preto {
+      --bg-gradient: linear-gradient(135deg, #090d12 0%, #1a232a 50%, #2a373f 100%);
+      --glass-bg: rgba(30, 41, 59, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --glass-border-outer: rgba(0, 0, 0, 0.6);
+      --glass-glow: rgba(0, 0, 0, 0.5);
+      --text-title: #ffffff;
+      --text-body: #e2e8f0;
+      --chan-post-bg: #1e293b;
+      --chan-post-border: #334155;
+      --chan-author: #4ade80;
+      --accent-button: linear-gradient(180deg, rgba(71, 85, 105, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+      --accent-button-border: rgba(255, 255, 255, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: 
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        var(--bg-gradient);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--text-body);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    /* Moldura estilo Janela de Vidro Aero */
+    .aero-window {
+      position: relative;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(190%);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      border-radius: 14px;
+      border: 1.5px solid var(--glass-border);
+      outline: 1px solid var(--glass-border-outer);
+      box-shadow: 
+        0 20px 45px var(--glass-glow),
+        0 8px 16px rgba(0, 0, 0, 0.15),
+        inset 0 2px 2px rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+    }
+
+    .aero-window::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 35%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+      border-radius: 12px 12px 0 0;
+    }
+
+    /* Header Superior */
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 22px;
+      margin-bottom: 20px;
+    }
+
+    .header-title {
+      text-align: center;
+      flex: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-title h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-title);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+    }
+
+    .btn-action {
+      padding: 9px 16px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--accent-button);
+      border: 1px solid var(--accent-button-border);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 6px 14px var(--glass-glow);
+    }
+
+    .user-profile {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 12px 4px 16px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      min-width: 170px;
+      justify-content: flex-end;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      background-color: #cbd5e1;
+    }
+
+    .user-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-title);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100px;
+    }
+
+    /* Layout Principal (Esquerda: Usuários | Direita: Board / Postagens) */
+    main {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* 3° ITEM: LISTA DE USUÁRIOS CADASTRADOS (Canto Esquerdo Superior) */
+    .users-sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      padding: 18px;
+    }
+
+    .users-title {
+      position: relative;
+      z-index: 2;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-title);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .users-list {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 580px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .user-card-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .user-card-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      background-color: #cbd5e1;
+    }
+
+    .user-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-title);
+      word-break: break-all;
+    }
+
+    .user-card-badge {
+      font-size: 9px;
+      font-weight: 800;
+      background: #dc2626;
+      color: #fff;
+      padding: 2px 5px;
+      border-radius: 6px;
+      margin-left: auto;
+    }
+
+    /* COLUNA DIREITA: FEED DO CHAN + FORMULÁRIO NO FINAL */
+    .chan-feed-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* 1° ITEM: APARÊNCIA DE CHAN AN TIGO NA INTERNET (Fundo claro, mensagens e anexos) */
+    .chan-board {
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chan-board-header {
+      position: relative;
+      z-index: 2;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-title);
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.5);
+    }
+
+    /* Mensagens no Estilo Post de Imageboard / Chan Retro */
+    .chan-post {
+      position: relative;
+      z-index: 2;
+      background: var(--chan-post-bg);
+      border: 1px solid var(--chan-post-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.08);
+      max-width: 100%;
+    }
+
+    .chan-post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--chan-post-border);
+      flex-wrap: wrap;
+    }
+
+    .chan-author-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      background: #fff;
+    }
+
+    .chan-author-name {
+      font-weight: 800;
+      color: var(--chan-author);
+    }
+
+    .chan-post-date {
+      color: #666;
+      font-size: 11.5px;
+    }
+
+    .chan-post-id {
+      color: #888;
+      font-size: 11.5px;
+      margin-left: auto;
+    }
+
+    .chan-post-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #111;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .chan-post-media {
+      margin-top: 10px;
+      max-width: 260px;
+      max-height: 260px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      object-fit: contain;
+      background: #ffffff;
+      display: block;
+      cursor: pointer;
+      transition: max-width 0.3s;
+    }
+
+    .chan-post-media:hover {
+      max-width: 100%;
+      max-height: 500px;
+    }
+
+    .empty-chan {
+      position: relative;
+      z-index: 2;
+      padding: 25px;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--text-body);
+      opacity: 0.85;
+    }
+
+    /* 2° ITEM: FORMULÁRIO DE ESCREVER RECADO NO FINAL DA PÁGINA */
+    .post-box-bottom {
+      width: 100%;
+      padding: 22px;
+    }
+
+    .post-box-title {
+      position: relative;
+      z-index: 2;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-title);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mural-form {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    textarea, input[type="url"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      font-size: 13.5px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      color: #111;
+      transition: all 0.2s;
+    }
+
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    textarea:focus, input[type="url"]:focus {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(33, 150, 243, 0.8);
+      box-shadow: 0 0 8px var(--glass-glow);
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: var(--text-title);
+      font-weight: 600;
+    }
+
+    #mural-message {
+      position: relative;
+      z-index: 2;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      display: none;
+      margin-bottom: 10px;
+    }
+
+    #mural-message.success {
+      display: block;
+      background: rgba(200, 230, 201, 0.9);
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+
+    #mural-message.error {
+      display: block;
+      background: rgba(255, 205, 210, 0.9);
+      color: #b71c1c;
+      border: 1px solid #ef9a9a;
+    }
+
+    /* BOTÃO DE ENGRENAGEM DE CONFIGURAÇÕES */
+    .settings-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent-button);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid var(--accent-button-border);
+      color: #ffffff;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .settings-btn:hover {
+      transform: rotate(45deg) scale(1.08);
+    }
+
+    .settings-modal {
+      position: fixed;
+      bottom: 85px;
+      right: 25px;
+      width: 320px;
+      padding: 20px;
+      display: none;
+      z-index: 1001;
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .settings-modal.active { display: block; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(15px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .settings-header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .settings-header h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+
+    .close-settings {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: var(--text-title);
+      font-weight: bold;
+    }
+
+    .setting-group {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 16px;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 6px;
+    }
+
+    .color-options {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 30px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .swatch-azul { background: linear-gradient(135deg, #0b4f8a, #1e88e5); }
+    .swatch-vermelho { background: linear-gradient(135deg, #7a0c0c, #d32f2f); }
+    .swatch-laranja { background: linear-gradient(135deg, #7c3600, #f57c00); }
+    .swatch-verde { background: linear-gradient(135deg, #094e24, #2e7d32); }
+    .swatch-roxo { background: linear-gradient(135deg, #4a148c, #7b1fa2); }
+    .swatch-preto { background: linear-gradient(135deg, #121212, #37474f); }
+
+    .wallpaper-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .wallpaper-thumb {
+      width: 100%;
+      height: 38px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(0, 0, 0, 0.15);
+      font-size: 9px;
+      font-weight: bold;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .reset-bg-btn {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 7px;
+      margin-top: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--accent-button);
+      border: 1px solid var(--accent-button-border);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 850px) {
+      main {
+        flex-direction: column;
+      }
+      .users-sidebar {
+        width: 100%;
+      }
+      header {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .user-profile {
+        justify-content: center;
+      }
+      .settings-modal {
+        right: 15px;
+        left: 15px;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CABEÇALHO -->
+  <header class="aero-window">
+    <div class="header-left">
+      <a href="pagina_inicial.html" class="btn-action">← Voltar para Página Inicial</a>
+    </div>
+    
+    <div class="header-title">
+      <h1>💬 Mural da Comunidade</h1>
+    </div>
+
+    <div class="user-profile">
+      <span class="user-name" id="user-display-name">Carregando...</span>
+      <img src="" alt="Foto de Perfil" id="user-display-avatar" class="user-avatar">
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
+  <main>
+    
+    <!-- 3° ITEM: LISTA DE PERFIS DOS USUÁRIOS CADASTRADOS (CANTO ESQUERDO SUPERIOR) -->
+    <aside class="users-sidebar aero-window">
+      <h2 class="users-title">👥 Usuários Cadastrados</h2>
+      <div class="users-list" id="users-list">
+        <div style="font-size: 12px; opacity: 0.8; text-align: center;">Carregando membros...</div>
+      </div>
+    </aside>
+
+    <!-- COLUNA DA DIREITA: MENSAGENS E FORMULÁRIO -->
+    <div class="chan-feed-wrapper">
+      
+      <!-- 1° ITEM: JANELA DO CHAN AN TIGO (MENSAGENS E ANEXOS DOS USUÁRIOS) -->
+      <section class="chan-board aero-window">
+        <div class="chan-board-header">📌 Tópico Principal - Mensagens da Comunidade</div>
+        <div id="chan-posts-container">
+          <div class="empty-chan">Carregando mensagens do mural...</div>
+        </div>
+      </section>
+
+      <!-- 2° ITEM: ÁREA DE ESCREVER SEU RECADO (ABAIXO DAS MENSAGENS) -->
+      <section class="post-box-bottom aero-window">
+        <h2 class="post-box-title">✍️ Deixar seu Recado no Mural</h2>
+        
+        <div id="mural-message"></div>
+
+        <form class="mural-form" id="mural-form">
+          <textarea id="msg-text" placeholder="Escreva aqui seu recado..." required></textarea>
+          <input type="url" id="msg-media-url" placeholder="URL opcional de imagem ou GIF (https://...)">
+          
+          <div class="form-footer">
+            <span class="hint-text">💡 Enviando como: <strong id="publishing-as-name">Usuário</strong></span>
+            <button type="submit" class="btn-action" id="btn-send">🚀 Enviar Recado</button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- BOTÃO DE ENGRENAGEM DE CONFIGURAÇÕES -->
+  <button class="settings-btn" onclick="toggleSettingsModal()" aria-label="Configurações">
+    ⚙️
+  </button>
+
+  <!-- MODAL DE CONFIGURAÇÕES TRANSLÚCIDO -->
+  <div class="settings-modal aero-window" id="settings-modal">
+    <div class="settings-header">
+      <h2>Configurações do Site</h2>
+      <button class="close-settings" onclick="toggleSettingsModal()">✕</button>
+    </div>
+
+    <div class="setting-group">
+      <label>Cor do Tema (Bordas e Vidro):</label>
+      <div class="color-options">
+        <div class="color-swatch swatch-azul" onclick="setTheme('azul')" title="Azul"></div>
+        <div class="color-swatch swatch-vermelho" onclick="setTheme('vermelho')" title="Vermelho"></div>
+        <div class="color-swatch swatch-laranja" onclick="setTheme('laranja')" title="Laranja"></div>
+        <div class="color-swatch swatch-verde" onclick="setTheme('verde')" title="Verde"></div>
+        <div class="color-swatch swatch-roxo" onclick="setTheme('roxo')" title="Roxo"></div>
+        <div class="color-swatch swatch-preto" onclick="setTheme('preto')" title="Preto"></div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <label>Plano de Fundo (Wallpapers):</label>
+      <div class="wallpaper-grid" id="wallpaper-grid"></div>
+      <button class="reset-bg-btn" onclick="setWallpaper('')">Restaurar Gradiente Original</button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       CONFIGURAÇÕES DO SUPABASE
+       ========================================================= */
+    const SUPABASE_URL = "https://jeiknrzkgopyvcbnilge.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_DNnrxGW9OWNnbMSYzBHUGQ_7UxGCEHW";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const WALLPAPERS = [
+      "https://i.pinimg.com/1200x/ba/1f/b4/ba1fb434b1aad928b1c1c5d027a9b03b.jpg",
+      "", "", "", "", "", "", "", "", ""
+    ];
+
+    let currentUser = null;
+    const messageDiv = document.getElementById("mural-message");
+
+    function showMsg(text, type = "success") {
+      messageDiv.textContent = text;
+      messageDiv.className = type;
+      setTimeout(() => {
+        messageDiv.className = "";
+        messageDiv.textContent = "";
+      }, 4000);
+    }
+
+    /* =========================================================
+       1. BUSCAR USUÁRIOS CADASTRADOS (ESQUERDA)
+       ========================================================= */
+    async function loadRegisteredUsers() {
+      const usersContainer = document.getElementById("users-list");
+
+      try {
+        // Busca administradores e usuários comuns
+        const [admRes, userRes] = await Promise.all([
+          supabaseClient.from("adm").select("nome, foto_perfil"),
+          supabaseClient.from("user").select("nome, foto_perfil")
+        ]);
+
+        let allUsers = [];
+
+        if (admRes.data) {
+          admRes.data.forEach(u => allUsers.push({ ...u, isAdmin: true }));
+        }
+        if (userRes.data) {
+          userRes.data.forEach(u => allUsers.push({ ...u, isAdmin: false }));
+        }
+
+        if (allUsers.length === 0) {
+          usersContainer.innerHTML = `<div style="font-size: 12px; text-align: center;">Nenhum usuário encontrado.</div>`;
+          return;
+        }
+
+        usersContainer.innerHTML = "";
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%231e88e5'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.67 3.37-2.58 5.05-2.58 1.67 0 5.02.91 5.05 2.58C15.8 19.15 14.03 20 12 20z'/></svg>";
+
+        allUsers.forEach(u => {
+          const item = document.createElement("div");
+          item.className = "user-card-item";
+
+          const avatar = u.foto_perfil || defaultAvatar;
+          const badgeHtml = u.isAdmin ? `<span class="user-card-badge">ADM</span>` : ``;
+
+          item.innerHTML = `
+            <img src="${avatar}" alt="${u.nome}" class="user-card-avatar">
+            <span class="user-card-name"></span>
+            ${badgeHtml}
+          `;
+
+          item.querySelector(".user-card-name").textContent = u.nome;
+          usersContainer.appendChild(item);
+        });
+
+      } catch (err) {
+        console.error("Erro ao carregar usuários:", err);
+        usersContainer.innerHTML = `<div style="font-size: 12px; text-align: center;">Erro ao carregar a lista.</div>`;
+      }
+    }
+
+    /* =========================================================
+       2. BUSCAR E EXIBIR MENSAGENS NO ESTILO CHAN
+       ========================================================= */
+    async function loadChanPosts() {
+      const container = document.getElementById("chan-posts-container");
+
+      try {
+        const { data, error } = await supabaseClient
+          .from("mural_mensagens")
+          .select("*")
+          .order("id", { ascending: true });
+
+        if (error) {
+          container.innerHTML = `<div class="empty-chan">Erro ao carregar mensagens.</div>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `<div class="empty-chan">Nenhuma mensagem postada neste mural ainda. Seja o primeiro a escrever no formulário abaixo!</div>`;
+          return;
+        }
+
+        container.innerHTML = "";
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%231e88e5'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.67 3.37-2.58 5.05-2.58 1.67 0 5.02.91 5.05 2.58C15.8 19.15 14.03 20 12 20z'/></svg>";
+
+        data.forEach(post => {
+          const postDiv = document.createElement("div");
+          postDiv.className = "chan-post";
+
+          let dateStr = "";
+          if (post.created_at) {
+            const dateObj = new Date(post.created_at);
+            dateStr = `${dateObj.toLocaleDateString('pt-BR')} (${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][dateObj.getDay()]}) ${dateObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+          }
+
+          let mediaHtml = "";
+          if (post.imagem_url && post.imagem_url.trim() !== "") {
+            mediaHtml = `<img src="${post.imagem_url}" alt="Anexo do Post" class="chan-post-media" loading="lazy" onerror="this.style.display='none'">`;
+          }
+
+          const avatar = post.usuario_foto || defaultAvatar;
+
+          postDiv.innerHTML = `
+            <div class="chan-post-header">
+              <img src="${avatar}" class="chan-author-avatar">
+              <span class="chan-author-name"></span>
+              <span class="chan-post-date">${dateStr}</span>
+              <span class="chan-post-id">No.${post.id}</span>
+            </div>
+            <div class="chan-post-content"></div>
+            ${mediaHtml}
+          `;
+
+          postDiv.querySelector(".chan-author-name").textContent = post.usuario_nome;
+          postDiv.querySelector(".chan-post-content").textContent = post.mensagem;
+
+          container.appendChild(postDiv);
+        });
+
+      } catch (err) {
+        console.error("Erro inesperado:", err);
+        container.innerHTML = `<div class="empty-chan">Falha na conexão com o servidor.</div>`;
+      }
+    }
+
+    /* =========================================================
+       3. PUBLICAR NOVO RECADO (NO FORMULÁRIO DO INFERIOR)
+       ========================================================= */
+    document.getElementById("mural-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      if (!currentUser) {
+        showMsg("Faça login para poder postar recados.", "error");
+        return;
+      }
+
+      const textarea = document.getElementById("msg-text");
+      const urlInput = document.getElementById("msg-media-url");
+      const btnSend = document.getElementById("btn-send");
+
+      const mensagem = textarea.value.trim();
+      const imagem_url = urlInput.value.trim();
+
+      if (!mensagem) return;
+
+      btnSend.disabled = true;
+      btnSend.textContent = "Postando...";
+
+      try {
+        const payload = {
+          usuario_nome: currentUser.nome || "Anônimo",
+          usuario_foto: currentUser.foto_perfil || "",
+          mensagem: mensagem,
+          imagem_url: imagem_url || null
+        };
+
+        const { error } = await supabaseClient
+          .from("mural_mensagens")
+          .insert([payload]);
+
+        if (error) {
+          showMsg(`Erro ao postar: ${error.message}`, "error");
+        } else {
+          showMsg("Recado publicado com sucesso no mural!", "success");
+          textarea.value = "";
+          urlInput.value = "";
+          await loadChanPosts();
+          
+          // Rola suavemente até o final da lista para ver a nova postagem
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+      } catch (err) {
+        showMsg("Erro ao tentar publicar recado.", "error");
+      } finally {
+        btnSend.disabled = false;
+        btnSend.textContent = "🚀 Enviar Recado";
+      }
+    });
+
+    /* =========================================================
+       CONFIGURAÇÕES DE TEMA & WALLPAPER
+       ========================================================= */
+    function toggleSettingsModal() {
+      document.getElementById("settings-modal").classList.toggle("active");
+    }
+
+    function setTheme(colorName) {
+      document.body.className = colorName === 'azul' ? '' : `theme-${colorName}`;
+      localStorage.setItem("dba_theme", colorName);
+    }
+
+    function setWallpaper(url) {
+      if (url) {
+        document.body.style.backgroundImage = `url('${url}')`;
+        localStorage.setItem("dba_wallpaper", url);
+      } else {
+        document.body.style.backgroundImage = "";
+        localStorage.removeItem("dba_wallpaper");
+      }
+    }
+
+    function renderWallpaperGrid() {
+      const grid = document.getElementById("wallpaper-grid");
+      grid.innerHTML = "";
+      WALLPAPERS.forEach((url, index) => {
+        const thumb = document.createElement("div");
+        thumb.className = "wallpaper-thumb";
+        thumb.textContent = `#${index + 1}`;
+        if (url) thumb.style.backgroundImage = `url('${url}')`;
+        thumb.onclick = () => url ? setWallpaper(url) : alert(`Insira a URL do Wallpaper #${index + 1} no código.`);
+        grid.appendChild(thumb);
+      });
+    }
+
+    /* =========================================================
+       INICIALIZAÇÃO DA PÁGINA
+       ========================================================= */
+    document.addEventListener("DOMContentLoaded", function() {
+      const sessionData = localStorage.getItem("userSession");
+
+      if (!sessionData) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const session = JSON.parse(sessionData);
+      currentUser = session.user;
+
+      document.getElementById("user-display-name").textContent = currentUser.nome || "Usuário";
+      document.getElementById("publishing-as-name").textContent = currentUser.nome || "Usuário";
+
+      const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%231e88e5'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.67 3.37-2.58 5.05-2.58 1.67 0 5.02.91 5.05 2.58C15.8 19.15 14.03 20 12 20z'/></svg>";
+      document.getElementById("user-display-avatar").src = currentUser.foto_perfil || defaultAvatar;
+
+      const savedTheme = localStorage.getItem("dba_theme");
+      if (savedTheme) setTheme(savedTheme);
+
+      const savedWallpaper = localStorage.getItem("dba_wallpaper");
+      if (savedWallpaper) setWallpaper(savedWallpaper);
+
+      renderWallpaperGrid();
+      loadRegisteredUsers();
+      loadChanPosts();
+    });
+  </script>
+
+</body>
+</html>
